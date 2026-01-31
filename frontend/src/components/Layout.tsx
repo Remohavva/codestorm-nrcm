@@ -9,7 +9,8 @@ import {
   LogOut, 
   User,
   BarChart3,
-  CheckSquare
+  CheckSquare,
+  Zap
 } from 'lucide-react';
 
 interface LayoutProps {
@@ -42,11 +43,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen gradient-bg">
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
-        <div className="flex h-16 items-center justify-center border-b border-gray-200">
-          <h1 className="text-xl font-bold text-gray-900">College Events</h1>
+      <div className="fixed inset-y-0 left-0 z-50 w-64 glass-effect backdrop-blur-xl">
+        <div className="flex h-16 items-center justify-center border-b border-dark-700">
+          <div className="flex items-center space-x-2">
+            <div className="p-2 bg-primary-600 rounded-lg">
+              <Zap className="h-5 w-5 text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-white">College Events</h1>
+          </div>
         </div>
         
         <nav className="mt-8 px-4">
@@ -59,13 +65,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <li key={item.name}>
                   <Link
                     to={item.href}
-                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                      isActive
-                        ? 'bg-primary-100 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-100'
+                    className={`sidebar-item ${
+                      isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
                     }`}
                   >
-                    <Icon className="mr-3 h-5 w-5" />
+                    <Icon className="mr-3 h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
                     {item.name}
                   </Link>
                 </li>
@@ -75,23 +79,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </nav>
 
         {/* User info and logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <div className="flex items-center mb-4">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-dark-700">
+          <div className="flex items-center mb-4 p-3 rounded-lg bg-dark-700/50">
             <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
+              <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center shadow-lg">
+                <User className="h-5 w-5 text-white" />
               </div>
             </div>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-              <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
+            <div className="ml-3 flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+              <p className="text-xs text-gray-400 capitalize truncate">
+                {user?.role?.replace('_', ' ')}
+              </p>
             </div>
           </div>
           <button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-2 text-sm font-medium text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-300 rounded-lg hover:text-white hover:bg-dark-700 transition-all duration-200 group"
           >
-            <LogOut className="mr-3 h-4 w-4" />
+            <LogOut className="mr-3 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
             Sign out
           </button>
         </div>
@@ -99,8 +105,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main content */}
       <div className="pl-64">
-        <main className="py-8 px-8">
-          {children}
+        <main className="py-8 px-8 min-h-screen">
+          <div className="animate-fade-in">
+            {children}
+          </div>
         </main>
       </div>
     </div>
