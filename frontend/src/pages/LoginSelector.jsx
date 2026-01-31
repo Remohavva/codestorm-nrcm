@@ -1,25 +1,10 @@
 import { Link } from 'react-router-dom';
 import { HiAcademicCap, HiUserGroup, HiArrowRight } from 'react-icons/hi';
-import Beams from '../components/Beams';
 import './LoginSelector.css';
 
 function LoginSelector() {
   return (
     <div className="login-selector-page">
-      {/* Beams Background */}
-      <div className="beams-background">
-        <Beams
-          beamWidth={2}
-          beamHeight={25}
-          beamNumber={15}
-          lightColor="#ffffff"
-          speed={1.5}
-          noiseIntensity={1.5}
-          scale={0.15}
-          rotation={45}
-        />
-      </div>
-
       <div className="selector-container">
         <div className="selector-header">
           <h1>CampusHub</h1>

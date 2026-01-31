@@ -19,7 +19,6 @@ import Profile from './pages/student/Profile';
 import EventDetail from './pages/student/EventDetail';
 import PastEventDetail from './pages/student/PastEventDetail';
 import CoordinatorDashboard from './pages/CoordinatorDashboard';
-import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -69,12 +68,6 @@ function App() {
         <Route path="/coordinator/dashboard" element={
           <ProtectedRoute requiredRole="club_lead">
             <CoordinatorDashboard />
-          </ProtectedRoute>
-        } />
-        
-        <Route path="/admin/dashboard" element={
-          <ProtectedRoute requiredRole="admin">
-            <AdminDashboard />
           </ProtectedRoute>
         } />
       </Routes>
