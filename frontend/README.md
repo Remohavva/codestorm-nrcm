@@ -1,117 +1,81 @@
-# College Event Platform - Frontend
+# CampusHub – College Event & Club Management Platform
 
-React TypeScript frontend for the College Event & Club Management Platform.
+Frontend for a college event and club management system. Built with **React**, **Vite**, and a minimal matte black UI. Role-based flows for **Student** and **Club Coordinator** (coordinator dashboard is placeholder). Uses mock data; no backend required to run.
+
+---
 
 ## Features
 
-- 🔐 Authentication (Login/Register)
-- 📊 Role-based dashboards (Student, Club Lead, Admin)
-- 📅 Event browsing and registration
-- 🏛️ Club management
-- 📝 Registration tracking
-- ✅ Attendance management
-- 📊 Admin analytics
+- **Student:** Feed, Events, Clubs, My Registrations, Discussions (chat-style), Profile (with edit)
+- **Auth:** Login (Student / Coordinator), Signup (Student only), Forgot password
+- **Events:** Upcoming events, event detail, registration, **Razorpay** payment link (https://razorpay.me/@golivignesh)
+- **Clubs:** List, club detail, history, leadership, event gallery, join/leave
+- **Past events:** Detail pages and gallery from club pages
+- **UI:** Matte black theme, glassmorphism, responsive layout
 
-## Tech Stack
+---
 
-- **Framework**: React 18 with TypeScript
-- **Styling**: Tailwind CSS
-- **Routing**: React Router v6
-- **HTTP Client**: Axios
-- **Icons**: Lucide React
-- **State Management**: React Context
-
-## Getting Started
-
-### Prerequisites
-- Node.js 16+
-- Backend API running on port 3001
-
-### Installation
+## Quick start
 
 ```bash
 # Install dependencies
 npm install
 
-# Start development server
-npm start
+# Run development server
+npm run dev
 ```
 
-The app will open at `http://localhost:3000`
+Open **http://localhost:5173** in your browser.
 
-### Environment Variables
+---
 
-Create a `.env` file:
-```
-REACT_APP_API_URL=http://localhost:3001
-```
+## Scripts
 
-## Project Structure
+| Command        | Description              |
+|----------------|--------------------------|
+| `npm run dev`  | Start dev server         |
+| `npm run build`| Production build         |
+| `npm run preview` | Preview production build |
+
+---
+
+## Project structure
 
 ```
 src/
-├── components/          # Reusable components
-│   ├── Layout.tsx      # Main layout with sidebar
-│   ├── ProtectedRoute.tsx
-│   └── LoadingSpinner.tsx
-├── contexts/           # React contexts
-│   └── AuthContext.tsx # Authentication state
-├── pages/              # Page components
-│   ├── Login.tsx
-│   ├── Register.tsx
-│   ├── Dashboard.tsx
-│   └── Events.tsx
-├── services/           # API services
-│   └── api.ts          # Axios configuration & API calls
-└── App.tsx             # Main app component
+├── components/   # Reusable (Sidebar, TopNavbar, GlassCard)
+├── layouts/      # DashboardLayout
+├── pages/        # Login, Signup, Student pages, Coordinator placeholder
+├── data/         # mockData.js
+├── App.jsx
+├── main.jsx
+└── index.css
 ```
 
-## Available Scripts
+---
 
-- `npm start` - Start development server
-- `npm run build` - Build for production
-- `npm test` - Run tests
-- `npm run eject` - Eject from Create React App
+## Docs in this repo
 
-## User Roles
+- **DEMO_GUIDE.md** – How to demo the app (flows, routes, payment)
+- **GIT_INSTRUCTIONS.md** – Step-by-step: commit and push to GitHub
+- **FEATURES_SUGGESTIONS.md** – Ideas for future features
 
-### Student
-- Browse and register for events
-- View registration history
-- Check-in to events
-- View personal dashboard
+---
 
-### Club Lead
-- Create and manage events
-- View event registrations
-- Manage club information
-- Check-in attendees
+## Git – push to GitHub
 
-### Admin
-- Approve/reject events
-- View analytics dashboard
-- Manage users and roles
-- System-wide oversight
+1. Open **GIT_INSTRUCTIONS.md**.
+2. Follow steps 1–10 (init, remote, add, commit, push).
 
-## API Integration
+Short version:
 
-The frontend communicates with the backend API through:
-- Axios interceptors for authentication
-- Centralized API service functions
-- Error handling and token management
-- Automatic logout on 401 responses
+```bash
+git init
+git add .
+git commit -m "Initial commit: CampusHub"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
+```
 
-## Authentication Flow
-
-1. User logs in with email/password
-2. Backend returns user data and access token
-3. Token stored in localStorage
-4. Token included in all API requests
-5. Automatic logout on token expiration
-
-## Responsive Design
-
-- Mobile-first approach with Tailwind CSS
-- Responsive sidebar navigation
-- Adaptive layouts for different screen sizes
-- Touch-friendly interface elements
+Replace `YOUR_USERNAME` and `YOUR_REPO` with your GitHub username and repository name.
