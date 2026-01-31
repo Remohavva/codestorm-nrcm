@@ -1,6 +1,7 @@
-@tailwind base;
+/* Temporarily disable Tailwind to fix startup issues */
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
 /* Keep existing custom styles */
 * {
@@ -202,4 +203,55 @@ input::placeholder, textarea::placeholder {
 
 .gap-4 {
   gap: 2rem;
+}
+
+/* Loading spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Basic responsive utilities */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+.h-32 {
+  height: 8rem;
+}
+
+.w-32 {
+  width: 8rem;
+}
+
+.h-12 {
+  height: 3rem;
+}
+
+.w-12 {
+  width: 3rem;
+}
+
+.h-64 {
+  height: 16rem;
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+.border-b-2 {
+  border-bottom-width: 2px;
+}
+
+.border-blue-600 {
+  border-color: #2563eb;
 }
