@@ -1,46 +1,117 @@
-# Getting Started with Create React App
+# College Event Platform - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React TypeScript frontend for the College Event & Club Management Platform.
+
+## Features
+
+- 🔐 Authentication (Login/Register)
+- 📊 Role-based dashboards (Student, Club Lead, Admin)
+- 📅 Event browsing and registration
+- 🏛️ Club management
+- 📝 Registration tracking
+- ✅ Attendance management
+- 📊 Admin analytics
+
+## Tech Stack
+
+- **Framework**: React 18 with TypeScript
+- **Styling**: Tailwind CSS
+- **Routing**: React Router v6
+- **HTTP Client**: Axios
+- **Icons**: Lucide React
+- **State Management**: React Context
+
+## Getting Started
+
+### Prerequisites
+- Node.js 16+
+- Backend API running on port 3001
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+```
+
+The app will open at `http://localhost:3000`
+
+### Environment Variables
+
+Create a `.env` file:
+```
+REACT_APP_API_URL=http://localhost:3001
+```
+
+## Project Structure
+
+```
+src/
+├── components/          # Reusable components
+│   ├── Layout.tsx      # Main layout with sidebar
+│   ├── ProtectedRoute.tsx
+│   └── LoadingSpinner.tsx
+├── contexts/           # React contexts
+│   └── AuthContext.tsx # Authentication state
+├── pages/              # Page components
+│   ├── Login.tsx
+│   ├── Register.tsx
+│   ├── Dashboard.tsx
+│   └── Events.tsx
+├── services/           # API services
+│   └── api.ts          # Axios configuration & API calls
+└── App.tsx             # Main app component
+```
 
 ## Available Scripts
 
-In the project directory, you can run:
+- `npm start` - Start development server
+- `npm run build` - Build for production
+- `npm test` - Run tests
+- `npm run eject` - Eject from Create React App
 
-### `npm start`
+## User Roles
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Student
+- Browse and register for events
+- View registration history
+- Check-in to events
+- View personal dashboard
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Club Lead
+- Create and manage events
+- View event registrations
+- Manage club information
+- Check-in attendees
 
-### `npm test`
+### Admin
+- Approve/reject events
+- View analytics dashboard
+- Manage users and roles
+- System-wide oversight
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## API Integration
 
-### `npm run build`
+The frontend communicates with the backend API through:
+- Axios interceptors for authentication
+- Centralized API service functions
+- Error handling and token management
+- Automatic logout on 401 responses
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Authentication Flow
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. User logs in with email/password
+2. Backend returns user data and access token
+3. Token stored in localStorage
+4. Token included in all API requests
+5. Automatic logout on token expiration
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Responsive Design
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Mobile-first approach with Tailwind CSS
+- Responsive sidebar navigation
+- Adaptive layouts for different screen sizes
+- Touch-friendly interface elements
