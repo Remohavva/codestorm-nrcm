@@ -2,7 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { eventsAPI, registrationsAPI, adminAPI } from '../services/api';
-import { Calendar, Users, CheckSquare, TrendingUp } from 'lucide-react';
+import { 
+  Calendar, 
+  Users, 
+  CheckSquare, 
+  TrendingUp, 
+  Plus,
+  Clock,
+  MapPin,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Dashboard: React.FC = () => {
@@ -66,14 +76,31 @@ const Dashboard: React.FC = () => {
     });
   };
 
+  const StatCard = ({ icon: Icon, title, value, color }: any) => (
+    <div className="card-compact group hover:scale-105 transition-transform duration-200">
+      <div className="flex items-center">
+        <div className={`flex-shrink-0 p-3 rounded-xl ${color} shadow-lg`}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
+        <div className="ml-4">
+          <p className="text-sm font-medium text-gray-400">{title}</p>
+          <p className="text-2xl font-bold text-white">{value}</p>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.name}!
-        </h1>
-        <p className="mt-2 text-gray-600">
+      <div className="text-center lg:text-left">
+        <div className="flex items-center justify-center lg:justify-start mb-4">
+          <Sparkles className="h-8 w-8 text-primary-400 mr-3" />
+          <h1 className="text-4xl font-bold text-white">
+            Welcome back, {user?.name}!
+          </h1>
+        </div>
+        <p className="text-xl text-gray-400 max-w-2xl">
           Here's what's happening in your college events platform.
         </p>
       </div>
@@ -81,61 +108,30 @@ const Dashboard: React.FC = () => {
       {/* Admin Stats */}
       {user?.role === 'admin' && stats && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Users className="h-8 w-8 text-primary-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.overview.total_users}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Calendar className="h-8 w-8 text-green-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Events</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.overview.total_events}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CheckSquare className="h-8 w-8 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Registrations</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.overview.total_registrations}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="card">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <TrendingUp className="h-8 w-8 text-purple-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Attendance</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.overview.total_attendance}
-                </p>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            icon={Users}
+            title="Total Users"
+            value={stats.overview.total_users}
+            color="bg-gradient-to-br from-primary-500 to-primary-700"
+          />
+          <StatCard
+            icon={Calendar}
+            title="Total Events"
+            value={stats.overview.total_events}
+            color="bg-gradient-to-br from-green-500 to-green-700"
+          />
+          <StatCard
+            icon={CheckSquare}
+            title="Registrations"
+            value={stats.overview.total_registrations}
+            color="bg-gradient-to-br from-blue-500 to-blue-700"
+          />
+          <StatCard
+            icon={TrendingUp}
+            title="Attendance"
+            value={stats.overview.total_attendance}
+            color="bg-gradient-to-br from-purple-500 to-purple-700"
+          />
         </div>
       )}
 
@@ -143,36 +139,53 @@ const Dashboard: React.FC = () => {
         {/* Upcoming Events */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Upcoming Events</h2>
+            <h2 className="text-2xl font-semibold text-white flex items-center">
+              <Calendar className="h-6 w-6 mr-2 text-primary-400" />
+              Upcoming Events
+            </h2>
             <Link
               to="/events"
-              className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+              className="btn-ghost flex items-center text-sm"
             >
               View all
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </div>
 
           {upcomingEvents.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No upcoming events</p>
+            <div className="text-center py-12">
+              <Calendar className="mx-auto h-12 w-12 text-gray-600 mb-4" />
+              <p className="text-gray-400">No upcoming events</p>
+            </div>
           ) : (
             <div className="space-y-4">
               {upcomingEvents.map((event) => (
                 <div
                   key={event.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="p-4 bg-dark-700/50 rounded-lg border border-dark-600 hover:border-primary-500/50 transition-all duration-200 group"
                 >
-                  <div>
-                    <h3 className="font-medium text-gray-900">{event.title}</h3>
-                    <p className="text-sm text-gray-500">{event.venue}</p>
-                    <p className="text-sm text-gray-500">
-                      {formatDate(event.date)}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-gray-900">
-                      {event.registration_count || 0}/{event.capacity}
-                    </p>
-                    <p className="text-xs text-gray-500">registered</p>
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-white group-hover:text-primary-300 transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="flex items-center text-sm text-gray-400 mt-2 space-x-4">
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1" />
+                          {event.venue}
+                        </div>
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-1" />
+                          {formatDate(event.date)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right ml-4">
+                      <div className="text-sm font-medium text-white">
+                        {event.registration_count || 0}/{event.capacity}
+                      </div>
+                      <div className="text-xs text-gray-400">registered</div>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -184,45 +197,58 @@ const Dashboard: React.FC = () => {
         {user?.role === 'student' && (
           <div className="card">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">My Registrations</h2>
+              <h2 className="text-2xl font-semibold text-white flex items-center">
+                <CheckSquare className="h-6 w-6 mr-2 text-primary-400" />
+                My Registrations
+              </h2>
               <Link
                 to="/registrations"
-                className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                className="btn-ghost flex items-center text-sm"
               >
                 View all
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
 
             {userRegistrations.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No upcoming registrations</p>
+              <div className="text-center py-12">
+                <CheckSquare className="mx-auto h-12 w-12 text-gray-600 mb-4" />
+                <p className="text-gray-400">No upcoming registrations</p>
+              </div>
             ) : (
               <div className="space-y-4">
                 {userRegistrations.map((registration) => (
                   <div
                     key={registration.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    className="p-4 bg-dark-700/50 rounded-lg border border-dark-600 hover:border-primary-500/50 transition-all duration-200 group"
                   >
-                    <div>
-                      <h3 className="font-medium text-gray-900">
-                        {registration.event.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {registration.event.venue}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {formatDate(registration.event.date)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          registration.status === 'registered'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {registration.status}
-                      </span>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-white group-hover:text-primary-300 transition-colors">
+                          {registration.event.title}
+                        </h3>
+                        <div className="flex items-center text-sm text-gray-400 mt-2 space-x-4">
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {registration.event.venue}
+                          </div>
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-1" />
+                            {formatDate(registration.event.date)}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <span
+                          className={`status-badge ${
+                            registration.status === 'registered'
+                              ? 'status-approved'
+                              : 'status-rejected'
+                          }`}
+                        >
+                          {registration.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -234,12 +260,16 @@ const Dashboard: React.FC = () => {
         {/* Quick Actions for Club Leads */}
         {user?.role === 'club_lead' && (
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Actions</h2>
+            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
+              <Plus className="h-6 w-6 mr-2 text-primary-400" />
+              Quick Actions
+            </h2>
             <div className="space-y-4">
               <Link
                 to="/events/create"
-                className="block w-full btn-primary text-center"
+                className="block w-full btn-primary text-center group"
               >
+                <Plus className="inline h-4 w-4 mr-2 transition-transform group-hover:scale-110" />
                 Create New Event
               </Link>
               <Link
@@ -255,12 +285,16 @@ const Dashboard: React.FC = () => {
         {/* Quick Actions for Admin */}
         {user?.role === 'admin' && (
           <div className="card">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Admin Actions</h2>
+            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center">
+              <TrendingUp className="h-6 w-6 mr-2 text-primary-400" />
+              Admin Actions
+            </h2>
             <div className="space-y-4">
               <Link
                 to="/admin/events"
-                className="block w-full btn-primary text-center"
+                className="block w-full btn-primary text-center group"
               >
+                <CheckSquare className="inline h-4 w-4 mr-2 transition-transform group-hover:scale-110" />
                 Review Pending Events
               </Link>
               <Link

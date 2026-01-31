@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { eventsAPI, registrationsAPI, clubsAPI } from '../services/api';
-import { Calendar, MapPin, Users, Plus, Filter } from 'lucide-react';
+import { 
+  Calendar, 
+  MapPin, 
+  Users, 
+  Plus, 
+  Filter, 
+  Clock,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const Events: React.FC = () => {
@@ -70,23 +79,26 @@ const Events: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved':
-        return 'bg-green-100 text-green-800';
+        return 'status-approved';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'status-pending';
       case 'rejected':
-        return 'bg-red-100 text-red-800';
+        return 'status-rejected';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-900 text-gray-200 border-gray-700';
     }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-4xl font-bold text-white flex items-center">
+            <Calendar className="h-8 w-8 mr-3 text-primary-400" />
+            Events
+          </h1>
+          <p className="mt-2 text-xl text-gray-400">
             Discover and register for upcoming college events
           </p>
         </div>
@@ -94,9 +106,9 @@ const Events: React.FC = () => {
         {(user?.role === 'club_lead' || user?.role === 'admin') && (
           <Link
             to="/events/create"
-            className="btn-primary flex items-center"
+            className="btn-primary flex items-center group"
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-2 transition-transform group-hover:scale-110" />
             Create Event
           </Link>
         )}
@@ -104,11 +116,14 @@ const Events: React.FC = () => {
 
       {/* Filters */}
       <div className="card">
-        <div className="flex items-center space-x-4">
-          <Filter className="h-5 w-5 text-gray-400" />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center">
+            <Filter className="h-5 w-5 text-gray-400 mr-2" />
+            <span className="text-sm text-gray-300">Filters:</span>
+          </div>
           
           <select
-            className="input-field"
+            className="input-field min-w-[120px]"
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
           >
@@ -119,7 +134,7 @@ const Events: React.FC = () => {
           </select>
 
           <select
-            className="input-field"
+            className="input-field min-w-[150px]"
             value={filters.club_id}
             onChange={(e) => setFilters({ ...filters, club_id: e.target.value })}
           >
@@ -134,82 +149,91 @@ const Events: React.FC = () => {
           <label className="flex items-center">
             <input
               type="checkbox"
-              className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              className="rounded border-dark-600 text-primary-600 focus:ring-primary-500 bg-dark-700"
               checked={filters.upcoming}
               onChange={(e) => setFilters({ ...filters, upcoming: e.target.checked })}
             />
-            <span className="ml-2 text-sm text-gray-700">Upcoming only</span>
+            <span className="ml-2 text-sm text-gray-300">Upcoming only</span>
           </label>
         </div>
       </div>
 
-      {/* Events List */}
+      {/* Events Grid */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <LoadingSpinner size="lg" />
         </div>
       ) : events.length === 0 ? (
-        <div className="text-center py-12">
-          <Calendar className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No events found</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Try adjusting your filters or check back later.
+        <div className="text-center py-16">
+          <Calendar className="mx-auto h-16 w-16 text-gray-600 mb-6" />
+          <h3 className="text-xl font-medium text-white mb-2">No events found</h3>
+          <p className="text-gray-400 mb-8">
+            Try adjusting your filters or check back later for new events.
           </p>
+          {(user?.role === 'club_lead' || user?.role === 'admin') && (
+            <Link
+              to="/events/create"
+              className="btn-primary inline-flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create First Event
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events.map((event) => (
-            <div key={event.id} className="card hover:shadow-md transition-shadow">
+            <div key={event.id} className="card group hover:scale-105 transition-all duration-300">
               <div className="flex items-start justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-white group-hover:text-primary-300 transition-colors mb-2">
                     {event.title}
                   </h3>
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                      event.status
-                    )}`}
-                  >
+                  <span className={`status-badge ${getStatusColor(event.status)}`}>
                     {event.status}
                   </span>
                 </div>
+                {event.status === 'approved' && (
+                  <Sparkles className="h-5 w-5 text-primary-400 animate-pulse-slow" />
+                )}
               </div>
 
               {event.description && (
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                <p className="text-gray-400 text-sm mb-4 line-clamp-2">
                   {event.description}
                 </p>
               )}
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-gray-500">
-                  <Calendar className="h-4 w-4 mr-2" />
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center text-sm text-gray-400">
+                  <Calendar className="h-4 w-4 mr-2 text-primary-400" />
                   {formatDate(event.date)}
                 </div>
                 
-                <div className="flex items-center text-sm text-gray-500">
-                  <MapPin className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-sm text-gray-400">
+                  <MapPin className="h-4 w-4 mr-2 text-primary-400" />
                   {event.venue}
                 </div>
                 
-                <div className="flex items-center text-sm text-gray-500">
-                  <Users className="h-4 w-4 mr-2" />
+                <div className="flex items-center text-sm text-gray-400">
+                  <Users className="h-4 w-4 mr-2 text-primary-400" />
                   {event.registration_count || 0}/{event.capacity} registered
                 </div>
 
                 {event.club && (
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-400">
                     by {event.club.name}
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-4 border-t border-dark-700">
                 <Link
                   to={`/events/${event.id}`}
-                  className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                  className="text-primary-400 hover:text-primary-300 text-sm font-medium flex items-center group"
                 >
                   View Details
+                  <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
 
                 {user?.role === 'student' && event.status === 'approved' && (
@@ -219,14 +243,17 @@ const Events: React.FC = () => {
                       registering === event.id ||
                       (event.registration_count || 0) >= event.capacity
                     }
-                    className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="btn-primary text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
                     {registering === event.id ? (
                       <LoadingSpinner size="sm" />
                     ) : (event.registration_count || 0) >= event.capacity ? (
                       'Full'
                     ) : (
-                      'Register'
+                      <>
+                        <Clock className="h-3 w-3 mr-1" />
+                        Register
+                      </>
                     )}
                   </button>
                 )}
