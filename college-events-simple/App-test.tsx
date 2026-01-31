@@ -96,22 +96,8 @@ export default function App() {
             onPress={() => setCurrentScreen('community')}
           >
             <Ionicons name="chatbubbles" size={24} color={COLORS.white} />
-            <Text style={styles.actionText}>Go to Community</Text>
+            <Text style={styles.actionText}>Community</Text>
           </TouchableOpacity>
-        </View>
-        
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Your Stats</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>5</Text>
-              <Text style={styles.statLabel}>Posts</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Text style={styles.statNumber}>23</Text>
-              <Text style={styles.statLabel}>Likes</Text>
-            </View>
-          </View>
         </View>
       </View>
       
@@ -136,10 +122,7 @@ export default function App() {
     <View style={styles.container}>
       <LinearGradient colors={CHROME_GRADIENT} style={styles.header}>
         <Text style={styles.headerTitle}>Community</Text>
-        <TouchableOpacity 
-          style={styles.createButton}
-          onPress={() => Alert.alert('Post Created!', 'Your post has been created successfully!')}
-        >
+        <TouchableOpacity style={styles.createButton}>
           <Ionicons name="add" size={24} color={COLORS.white} />
         </TouchableOpacity>
       </LinearGradient>
@@ -170,20 +153,14 @@ export default function App() {
           </View>
           <Text style={styles.postTitle}>Welcome to College Events!</Text>
           <Text style={styles.postContent}>
-            This is where students can discuss events, clubs, and campus life. Share your thoughts and connect with fellow students!
+            This is where students can discuss events, clubs, and campus life.
           </Text>
           <View style={styles.postActions}>
-            <TouchableOpacity 
-              style={styles.actionIcon}
-              onPress={() => Alert.alert('Liked!', 'You liked this post!')}
-            >
+            <TouchableOpacity style={styles.actionIcon}>
               <Ionicons name="heart-outline" size={20} color={COLORS.textSecondary} />
               <Text style={styles.actionCount}>15</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.actionIcon}
-              onPress={() => Alert.alert('Comments', 'Comments feature coming soon!')}
-            >
+            <TouchableOpacity style={styles.actionIcon}>
               <Ionicons name="chatbubble-outline" size={20} color={COLORS.textSecondary} />
               <Text style={styles.actionCount}>3</Text>
             </TouchableOpacity>
@@ -224,24 +201,6 @@ export default function App() {
           <View style={styles.roleBadge}>
             <Text style={styles.roleText}>STUDENT</Text>
           </View>
-        </View>
-        
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Settings</Text>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => Alert.alert('Settings', 'Settings feature coming soon!')}
-          >
-            <Ionicons name="settings-outline" size={24} color={COLORS.accent} />
-            <Text style={styles.menuText}>App Settings</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.menuItem}
-            onPress={() => Alert.alert('Help', 'Help feature coming soon!')}
-          >
-            <Ionicons name="help-circle-outline" size={24} color={COLORS.accent} />
-            <Text style={styles.menuText}>Help & Support</Text>
-          </TouchableOpacity>
         </View>
         
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -486,23 +445,6 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     marginLeft: 4,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.accent,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
   profileCard: {
     backgroundColor: COLORS.white,
     padding: 24,
@@ -549,16 +491,6 @@ const styles = StyleSheet.create({
   roleText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: COLORS.black,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    gap: 12,
-  },
-  menuText: {
-    fontSize: 16,
     color: COLORS.black,
   },
   logoutButton: {
