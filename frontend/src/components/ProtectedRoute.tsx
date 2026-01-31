@@ -23,6 +23,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Allow admin to access all routes
+  if (user.role === 'admin') {
+    return <>{children}</>;
+  }
+
+  // Check specific role requirements
   if (requiredRole && user.role !== requiredRole) {
     return <Navigate to="/dashboard" replace />;
   }

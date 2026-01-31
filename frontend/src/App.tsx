@@ -10,8 +10,13 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
 import EventDetails from './pages/EventDetails';
+import CreateEvent from './pages/CreateEvent';
 import Clubs from './pages/Clubs';
+import CreateClub from './pages/CreateClub';
+import MyClub from './pages/MyClub';
 import UserRegistrations from './pages/UserRegistrations';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminEvents from './pages/AdminEvents';
 
 function App() {
   return (
@@ -58,6 +63,17 @@ function App() {
           />
           
           <Route
+            path="/events/create"
+            element={
+              <ProtectedRoute requiredRole="club_lead">
+                <Layout>
+                  <CreateEvent />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
             path="/clubs"
             element={
               <ProtectedRoute>
@@ -69,11 +85,55 @@ function App() {
           />
           
           <Route
+            path="/clubs/create"
+            element={
+              <ProtectedRoute requiredRole="club_lead">
+                <Layout>
+                  <CreateClub />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/my-club"
+            element={
+              <ProtectedRoute requiredRole="club_lead">
+                <Layout>
+                  <MyClub />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
             path="/registrations"
             element={
               <ProtectedRoute requiredRole="student">
                 <Layout>
                   <UserRegistrations />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <AdminDashboard />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/events"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <AdminEvents />
                 </Layout>
               </ProtectedRoute>
             }
