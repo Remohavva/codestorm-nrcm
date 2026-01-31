@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiMail, HiLockClosed, HiArrowRight, HiUserGroup } from 'react-icons/hi';
 import GlassCard from '../components/GlassCard';
+import Beams from '../components/Beams';
 import './Login.css';
 
 function CoordinatorLogin() {
@@ -17,6 +18,20 @@ function CoordinatorLogin() {
 
   return (
     <div className="login-page">
+      {/* Beams Background */}
+      <div className="beams-background">
+        <Beams
+          beamWidth={3}
+          beamHeight={30}
+          beamNumber={20}
+          lightColor="#ffffff"
+          speed={2}
+          noiseIntensity={1.75}
+          scale={0.2}
+          rotation={30}
+        />
+      </div>
+
       {/* Left Panel - Branding */}
       <div className="login-left-panel">
         <div className="branding-content">
