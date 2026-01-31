@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from './ui/Button';
 import { 
   Home, 
   Calendar, 
@@ -43,18 +44,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen gradient-bg">
+    <div className="min-h-screen bg-gray-950">
       {/* Sidebar */}
-      <div className="fixed inset-y-0 left-0 z-50 w-64 glass-effect backdrop-blur-xl">
-        <div className="flex h-16 items-center justify-center border-b border-dark-700">
+      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-gray-900/95 backdrop-blur-sm border-r border-gray-800">
+        {/* Logo */}
+        <div className="flex h-16 items-center justify-center border-b border-gray-800">
           <div className="flex items-center space-x-2">
-            <div className="p-2 bg-primary-600 rounded-lg">
+            <div className="p-2 bg-blue-600 rounded-lg">
               <Zap className="h-5 w-5 text-white" />
             </div>
             <h1 className="text-xl font-bold text-white">College Events</h1>
           </div>
         </div>
         
+        {/* Navigation */}
         <nav className="mt-8 px-4">
           <ul className="space-y-2">
             {navigation.map((item) => {
@@ -65,8 +68,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <li key={item.name}>
                   <Link
                     to={item.href}
-                    className={`sidebar-item group ${
-                      isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
+                    className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                      isActive 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'text-gray-300 hover:text-white hover:bg-gray-800'
                     }`}
                   >
                     <Icon className="mr-3 h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
@@ -79,10 +84,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </nav>
 
         {/* User info and logout */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-dark-700">
-          <div className="flex items-center mb-4 p-3 rounded-lg bg-dark-700/50">
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
+          <div className="flex items-center mb-4 p-3 rounded-lg bg-gray-800/50">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-full flex items-center justify-center shadow-lg">
+              <div className="h-10 w-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
                 <User className="h-5 w-5 text-white" />
               </div>
             </div>
@@ -93,13 +98,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </p>
             </div>
           </div>
-          <button
+          <Button
             onClick={handleLogout}
-            className="flex items-center w-full px-4 py-3 text-sm font-medium text-gray-300 rounded-lg hover:text-white hover:bg-dark-700 transition-all duration-200 group"
+            variant="ghost"
+            className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800"
           >
-            <LogOut className="mr-3 h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+            <LogOut className="mr-3 h-4 w-4" />
             Sign out
-          </button>
+          </Button>
         </div>
       </div>
 
