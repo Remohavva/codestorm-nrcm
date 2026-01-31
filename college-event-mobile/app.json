@@ -1,0 +1,36 @@
+{
+  "expo": {
+    "name": "College Events",
+    "slug": "college-event-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#C0C0C0"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.college.events"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#C0C0C0"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.college.events"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    }
+  }
+}

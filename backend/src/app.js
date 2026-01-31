@@ -13,6 +13,7 @@ const registrationRoutes = require('./routes/registrations');
 const attendanceRoutes = require('./routes/attendance');
 const adminRoutes = require('./routes/admin');
 const coordinatorRoutes = require('./routes/coordinator');
+const communityRoutes = require('./routes/community');
 
 const app = express();
 
@@ -57,6 +58,7 @@ app.use('/api', registrationRoutes); // Includes /api/events/:id/register and /a
 app.use('/api', attendanceRoutes);   // Includes /api/events/:id/checkin and /api/users/me/attendance
 app.use('/api/admin', adminRoutes);
 app.use('/api/coordinator', coordinatorRoutes);
+app.use('/api/community', communityRoutes);
 
 // 404 handler
 app.use(notFound);

@@ -6,7 +6,10 @@ const {
   getAllUsers, 
   updateUserRole,
   getPendingEvents,
-  updateEventStatus
+  updateEventStatus,
+  getReports,
+  handleReport,
+  getCommunityAnalytics
 } = require('../controllers/adminController');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 
@@ -17,6 +20,7 @@ router.use(requireAdmin);
 // Analytics and dashboard
 router.get('/analytics', getAnalytics);
 router.get('/events/pending', getPendingEvents);
+router.get('/community/analytics', getCommunityAnalytics);
 
 // Management routes
 router.get('/events', getAllEvents);
@@ -24,9 +28,8 @@ router.put('/events/:id/status', updateEventStatus);
 router.get('/users', getAllUsers);
 router.put('/users/:id/role', updateUserRole);
 
-module.exports = router;
-router.get('/events', getAllEvents);
-router.get('/users', getAllUsers);
-router.put('/users/:id/role', updateUserRole);
+// Community moderation routes
+router.get('/reports', getReports);
+router.put('/reports/:id', handleReport);
 
 module.exports = router;

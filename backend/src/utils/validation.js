@@ -37,6 +37,28 @@ const eventUpdateSchema = Joi.object({
   capacity: Joi.number().integer().min(1).optional()
 });
 
+// Community validation schemas
+const postSchema = Joi.object({
+  title: Joi.string().min(3).max(255).required(),
+  content: Joi.string().min(10).max(5000).required(),
+  category: Joi.string().valid('general', 'events', 'clubs', 'academic', 'social', 'announcements').default('general')
+});
+
+const commentSchema = Joi.object({
+  content: Joi.string().min(1).max(1000).required()
+});
+
+const reactionSchema = Joi.object({
+  type: Joi.string().valid('like', 'dislike').required()
+});
+
+const reportSchema = Joi.object({
+  type: Joi.string().valid('post', 'comment').required(),
+  content_id: Joi.string().uuid().required(),
+  reason: Joi.string().valid('spam', 'harassment', 'inappropriate', 'misinformation', 'other').required(),
+  description: Joi.string().max(500).optional()
+});
+
 // Validation middleware
 const validate = (schema) => {
   return (req, res, next) => {
@@ -58,5 +80,9 @@ module.exports = {
   clubSchema,
   eventSchema,
   eventUpdateSchema,
+  postSchema,
+  commentSchema,
+  reactionSchema,
+  reportSchema,
   validate
 };

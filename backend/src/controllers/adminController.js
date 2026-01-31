@@ -336,3 +336,179 @@ module.exports = {
   getPendingEvents,
   updateEventStatus
 };
+// Community moderation functions
+
+// Get all reports for admin review
+const getReports = async (req, res, next) => {
+  try {
+    const { status = 'pending', page = 1, limit = 20 } = req.query;
+    const offset = (page - 1) * limit;
+
+    const { data: reports, error, count } = await supabaseAdmin
+      .from('reports')
+      .select(`
+        *,
+        reporter:users!reporter_id(id, name, email),
+        post:posts(id, title, author:users!author_id(id, name)),
+        comment:comments(id, content, author:users!author_id(id, name))
+      `, { count: 'exact' })
+      .eq('status', status)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    res.json({
+      success: true,
+      data: {
+        reports,
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: count,
+          pages: Math.ceil(count / limit)
+        }
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Handle report (approve/dismiss)
+const handleReport = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { action, admin_notes } = req.body; // 'approved' or 'dismissed'
+
+    if (!['approved', 'dismissed'].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid action. Must be "approved" or "dismissed"'
+      });
+    }
+
+    // Get report details
+    const { data: report, error: reportError } = await supabaseAdmin
+      .from('reports')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (reportError) {
+      if (reportError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Report not found'
+        });
+      }
+      throw reportError;
+    }
+
+    // Update report status
+    const { error: updateError } = await supabaseAdmin
+      .from('reports')
+      .update({
+        status: action,
+        admin_notes,
+        reviewed_by: req.user.id,
+        reviewed_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    if (updateError) throw updateError;
+
+    // If approved, take action on the content
+    if (action === 'approved') {
+      if (report.content_type === 'post') {
+        await supabaseAdmin
+          .from('posts')
+          .update({ status: 'hidden' })
+          .eq('id', report.content_id);
+      } else if (report.content_type === 'comment') {
+        await supabaseAdmin
+          .from('comments')
+          .update({ status: 'hidden' })
+          .eq('id', report.content_id);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Report ${action} successfully`,
+      data: { report_id: id, action }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get community analytics
+const getCommunityAnalytics = async (req, res, next) => {
+  try {
+    const [
+      { data: posts, error: postsError },
+      { data: comments, error: commentsError },
+      { data: reactions, error: reactionsError },
+      { data: reports, error: reportsError }
+    ] = await Promise.all([
+      supabaseAdmin.from('posts').select('id, created_at, status'),
+      supabaseAdmin.from('comments').select('id, created_at'),
+      supabaseAdmin.from('reactions').select('id, type, created_at'),
+      supabaseAdmin.from('reports').select('id, status, created_at')
+    ]);
+
+    if (postsError) throw postsError;
+    if (commentsError) throw commentsError;
+    if (reactionsError) throw reactionsError;
+    if (reportsError) throw reportsError;
+
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const analytics = {
+      overview: {
+        total_posts: posts.filter(p => p.status === 'active').length,
+        total_comments: comments.length,
+        total_reactions: reactions.length,
+        total_reports: reports.length
+      },
+      recent_activity: {
+        new_posts_30d: posts.filter(p => new Date(p.created_at) >= thirtyDaysAgo && p.status === 'active').length,
+        new_comments_30d: comments.filter(c => new Date(c.created_at) >= thirtyDaysAgo).length,
+        new_reactions_30d: reactions.filter(r => new Date(r.created_at) >= thirtyDaysAgo).length,
+        new_reports_30d: reports.filter(r => new Date(r.created_at) >= thirtyDaysAgo).length
+      },
+      moderation: {
+        pending_reports: reports.filter(r => r.status === 'pending').length,
+        approved_reports: reports.filter(r => r.status === 'approved').length,
+        dismissed_reports: reports.filter(r => r.status === 'dismissed').length,
+        hidden_posts: posts.filter(p => p.status === 'hidden').length
+      },
+      engagement: {
+        likes: reactions.filter(r => r.type === 'like').length,
+        dislikes: reactions.filter(r => r.type === 'dislike').length,
+        avg_comments_per_post: posts.length > 0 ? (comments.length / posts.filter(p => p.status === 'active').length).toFixed(2) : 0
+      }
+    };
+
+    res.json({
+      success: true,
+      data: { analytics }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getAnalytics,
+  getAllEvents,
+  getAllUsers,
+  updateUserRole,
+  getPendingEvents,
+  updateEventStatus,
+  getReports,
+  handleReport,
+  getCommunityAnalytics
+};
