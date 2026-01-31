@@ -17,6 +17,8 @@ import MyClub from './pages/MyClub';
 import UserRegistrations from './pages/UserRegistrations';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminEvents from './pages/AdminEvents';
+import UserManagement from './pages/UserManagement';
+import Attendance from './pages/Attendance';
 
 function App() {
   return (
@@ -134,6 +136,28 @@ function App() {
               <ProtectedRoute requiredRole="admin">
                 <Layout>
                   <AdminEvents />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Layout>
+                  <UserManagement />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          
+          <Route
+            path="/events/:id/attendance"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <Attendance />
                 </Layout>
               </ProtectedRoute>
             }
