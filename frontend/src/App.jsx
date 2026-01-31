@@ -4,6 +4,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginSelector from './pages/LoginSelector';
 import StudentLogin from './pages/StudentLogin';
 import CoordinatorLogin from './pages/CoordinatorLogin';
+import SimpleLogin from './pages/SimpleLogin';
+import SimpleDashboard from './pages/SimpleDashboard';
 import Signup from './pages/Signup';
 import ForgotPassword from './pages/ForgotPassword';
 import DashboardLayout from './layouts/DashboardLayout';
@@ -37,6 +39,12 @@ function App() {
         <Route path="/login" element={<LoginSelector />} />
         <Route path="/login/student" element={<StudentLogin />} />
         <Route path="/login/coordinator" element={<CoordinatorLogin />} />
+        <Route path="/simple-login" element={<SimpleLogin />} />
+        <Route path="/simple-dashboard" element={
+          <ProtectedRoute>
+            <SimpleDashboard />
+          </ProtectedRoute>
+        } />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         
