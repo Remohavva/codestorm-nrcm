@@ -37,6 +37,9 @@ const register = async (req, res, next) => {
       throw userError;
     }
 
+    // Create a simple session token for the new user (same as login)
+    const sessionToken = Buffer.from(`${userData.id}:${Date.now()}`).toString('base64');
+
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
@@ -46,6 +49,11 @@ const register = async (req, res, next) => {
           name: userData.name,
           email: userData.email,
           role: userData.role
+        },
+        session: {
+          access_token: sessionToken,
+          refresh_token: 'test_refresh_token',
+          expires_at: Date.now() + 3600000 // 1 hour
         }
       }
     });

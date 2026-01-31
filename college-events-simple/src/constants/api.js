@@ -1,6 +1,6 @@
 // API Configuration
 export const API_BASE_URL = __DEV__ 
-  ? 'http://localhost:3001/api'  // Development - Change to your computer's IP if needed
+  ? 'http://10.10.10.143:3002/api'  // Development - Use computer's IP for mobile testing
   : 'https://your-production-api.com/api'; // Production
 
 export const API_ENDPOINTS = {
