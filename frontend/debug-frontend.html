@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #ffffff;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            background: #1a1a1a;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #2563eb; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            background: #111;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { border-left: 4px solid #10b981; }
+        .error { border-left: 4px solid #ef4444; }
+        input, select {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #222;
+            color: white;
+            width: 200px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Frontend-Backend Debug Tool</h1>
+    
+    <div class="grid">
+        <div class="section">
+            <h2>1. Environment Check</h2>
+            <button onclick="checkEnvironment()">Check Environment</button>
+            <div id="env-result" class="result"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Backend Health</h2>
+            <button onclick="testHealth()">Test Health</button>
+            <div id="health-result" class="result"></div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. Authentication Test</h2>
+        <div>
+            <input type="email" id="auth-email" placeholder="Email" value="test@example.com">
+            <input type="password" id="auth-password" placeholder="Password" value="password123">
+            <select id="auth-role">
+                <option value="student">Student</option>
+                <option value="club_lead">Club Lead</option>
+                <option value="admin">Admin</option>
+            </select>
+        </div>
+        <div>
+            <button onclick="testRegistration()">Test Registration</button>
+            <button onclick="testLogin()">Test Login</button>
+            <button onclick="testAxiosLogin()">Test Axios Login</button>
+        </div>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. API Endpoints Test</h2>
+        <button onclick="testEvents()">Test Events</button>
+        <button onclick="testClubs()">Test Clubs</button>
+        <button onclick="testWithAuth()">Test With Auth Token</button>
+        <div id="api-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. CORS & Network Test</h2>
+        <button onclick="testCORS()">Test CORS</button>
+        <button onclick="testPreflight()">Test Preflight</button>
+        <div id="cors-result" class="result"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
+    <script>
+        const API_BASE = 'http://localhost:3001';
+        let authToken = null;
+
+        function log(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            element.textContent += logMessage;
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).textContent = '';
+        }
+
+        function checkEnvironment() {
+            clearLog('env-result');
+            log('env-result', 'Environment Information:');
+            log('env-result', `- User Agent: ${navigator.userAgent}`);
+            log('env-result', `- Current URL: ${window.location.href}`);
+            log('env-result', `- API Base: ${API_BASE}`);
+            log('env-result', `- Local Storage: ${JSON.stringify(localStorage)}`);
+            log('env-result', `- Session Storage: ${JSON.stringify(sessionStorage)}`);
+        }
+
+        async function testHealth() {
+            clearLog('health-result');
+            try {
+                log('health-result', 'Testing health endpoint...');
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                log('health-result', `✅ Health check successful: ${JSON.stringify(data, null, 2)}`);
+            } catch (error) {
+                log('health-result', `❌ Health check failed: ${error.message}`, true);
+            }
+        }
+
+        async function testRegistration() {
+            clearLog('auth-result');
+            try {
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+                const role = document.getElementById('auth-role').value;
+                const name = 'Test User ' + Date.now();
+
+                log('auth-result', `Testing registration for ${email}...`);
+                
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, email, password, role })
+                });
+                
+                const data = await response.json();
+                log('auth-result', `Registration response (${response.status}): ${JSON.stringify(data, null, 2)}`, !response.ok);
+            } catch (error) {
+                log('auth-result', `❌ Registration failed: ${error.message}`, true);
+            }
+        }
+
+        async function testLogin() {
+            clearLog('auth-result');
+            try {
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+
+                log('auth-result', `Testing login for ${email}...`);
+                
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    authToken = data.data.session.access_token;
+                    localStorage.setItem('token', authToken);
+                    localStorage.setItem('user', JSON.stringify(data.data.user));
+                    log('auth-result', `✅ Login successful! Token saved.`);
+                }
+                
+                log('auth-result', `Login response (${response.status}): ${JSON.stringify(data, null, 2)}`, !response.ok);
+            } catch (error) {
+                log('auth-result', `❌ Login failed: ${error.message}`, true);
+            }
+        }
+
+        async function testAxiosLogin() {
+            clearLog('auth-result');
+            try {
+                const email = document.getElementById('auth-email').value;
+                const password = document.getElementById('auth-password').value;
+
+                log('auth-result', `Testing Axios login for ${email}...`);
+                
+                const response = await axios.post(`${API_BASE}/api/auth/login`, {
+                    email,
+                    password
+                });
+                
+                if (response.data.success) {
+                    authToken = response.data.data.session.access_token;
+                    localStorage.setItem('token', authToken);
+                    localStorage.setItem('user', JSON.stringify(response.data.data.user));
+                    log('auth-result', `✅ Axios login successful! Token saved.`);
+                }
+                
+                log('auth-result', `Axios login response (${response.status}): ${JSON.stringify(response.data, null, 2)}`);
+            } catch (error) {
+                log('auth-result', `❌ Axios login failed: ${error.response?.data || error.message}`, true);
+            }
+        }
+
+        async function testEvents() {
+            clearLog('api-result');
+            try {
+                log('api-result', 'Testing events endpoint...');
+                const response = await fetch(`${API_BASE}/api/events`);
+                const data = await response.json();
+                log('api-result', `Events response (${response.status}): ${JSON.stringify(data, null, 2)}`, !response.ok);
+            } catch (error) {
+                log('api-result', `❌ Events test failed: ${error.message}`, true);
+            }
+        }
+
+        async function testClubs() {
+            clearLog('api-result');
+            try {
+                log('api-result', 'Testing clubs endpoint...');
+                const response = await fetch(`${API_BASE}/api/clubs`);
+                const data = await response.json();
+                log('api-result', `Clubs response (${response.status}): ${JSON.stringify(data, null, 2)}`, !response.ok);
+            } catch (error) {
+                log('api-result', `❌ Clubs test failed: ${error.message}`, true);
+            }
+        }
+
+        async function testWithAuth() {
+            clearLog('api-result');
+            try {
+                const token = authToken || localStorage.getItem('token');
+                if (!token) {
+                    log('api-result', '❌ No auth token available. Please login first.', true);
+                    return;
+                }
+
+                log('api-result', 'Testing authenticated endpoint...');
+                const response = await fetch(`${API_BASE}/api/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                log('api-result', `Profile response (${response.status}): ${JSON.stringify(data, null, 2)}`, !response.ok);
+            } catch (error) {
+                log('api-result', `❌ Auth test failed: ${error.message}`, true);
+            }
+        }
+
+        async function testCORS() {
+            clearLog('cors-result');
+            try {
+                log('cors-result', 'Testing CORS...');
+                
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                log('cors-result', `✅ CORS test successful`);
+                log('cors-result', `Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+            } catch (error) {
+                log('cors-result', `❌ CORS test failed: ${error.message}`, true);
+            }
+        }
+
+        async function testPreflight() {
+            clearLog('cors-result');
+            try {
+                log('cors-result', 'Testing preflight request...');
+                
+                const response = await fetch(`${API_BASE}/api/auth/login`, {
+                    method: 'OPTIONS'
+                });
+                
+                log('cors-result', `✅ Preflight test successful (${response.status})`);
+                log('cors-result', `Response headers: ${JSON.stringify([...response.headers.entries()])}`);
+            } catch (error) {
+                log('cors-result', `❌ Preflight test failed: ${error.message}`, true);
+            }
+        }
+
+        // Auto-run basic tests on load
+        window.onload = () => {
+            checkEnvironment();
+            testHealth();
+        };
+    </script>
+</body>
+</html>
