@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinator System Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #111827;
+            color: white;
+            padding: 2rem;
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background-color: #1f2937;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #374151;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .result {
+            background-color: #374151;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #f87171;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #374151;
+            border: 1px solid #6b7280;
+            border-radius: 4px;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Coordinator System Final Test</h1>
+        <p>Testing the complete coordinator system with real backend integration.</p>
+
+        <!-- Login Test -->
+        <div class="test-section">
+            <h2>1. Login Test</h2>
+            <p>Test coordinator login with real API</p>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" value="coordinator@university.edu">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" value="password123">
+            </div>
+            <button onclick="testLogin()">Test Login</button>
+            <div id="loginResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Dashboard Test -->
+        <div class="test-section">
+            <h2>2. Dashboard Data Test</h2>
+            <p>Test fetching coordinator dashboard data</p>
+            <button onclick="testDashboard()">Test Dashboard</button>
+            <div id="dashboardResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Create Event Test -->
+        <div class="test-section">
+            <h2>3. Create Event Test</h2>
+            <p>Test creating a new event</p>
+            <div class="form-group">
+                <label>Event Title:</label>
+                <input type="text" id="eventTitle" value="Test Workshop: React Fundamentals">
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="eventDescription" rows="3">Learn the fundamentals of React development in this hands-on workshop.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Date & Time:</label>
+                <input type="datetime-local" id="eventDate">
+            </div>
+            <div class="form-group">
+                <label>Venue:</label>
+                <input type="text" id="eventVenue" value="Computer Lab 101">
+            </div>
+            <div class="form-group">
+                <label>Capacity:</label>
+                <input type="number" id="eventCapacity" value="30">
+            </div>
+            <button onclick="testCreateEvent()">Create Event</button>
+            <div id="createEventResult" class="result" style="display: none;"></div>
+        </div>
+
+        <!-- Frontend Integration Test -->
+        <div class="test-section">
+            <h2>4. Frontend Integration Test</h2>
+            <p>Test the actual React frontend</p>
+            <button onclick="openFrontend()">Open Frontend (New Tab)</button>
+            <button onclick="openCoordinatorLogin()">Open Coordinator Login (New Tab)</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:3002';
+        let authToken = null;
+        let clubId = null;
+
+        // Set default date to tomorrow
+        document.getElementById('eventDate').value = new Date(Date.now() + 24*60*60*1000).toISOString().slice(0, 16);
+
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const resultDiv = document.getElementById('loginResult');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Testing login...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    authToken = data.data.session.access_token;
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Login successful!\n\nUser: ${data.data.user.name}\nEmail: ${data.data.user.email}\nRole: ${data.data.user.role}\nToken: ${authToken.substring(0, 20)}...`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Login failed: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network error: ${error.message}`;
+            }
+        }
+
+        async function testDashboard() {
+            const resultDiv = document.getElementById('dashboardResult');
+            
+            if (!authToken) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Please login first';
+                return;
+            }
+
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Fetching dashboard data...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/coordinator/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Store club ID for event creation
+                    if (data.data.clubs && data.data.clubs.length > 0) {
+                        clubId = data.data.clubs[0].id;
+                    }
+
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Dashboard data loaded!\n\n${JSON.stringify(data.data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Dashboard failed: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network error: ${error.message}`;
+            }
+        }
+
+        async function testCreateEvent() {
+            const resultDiv = document.getElementById('createEventResult');
+            
+            if (!authToken) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Please login first';
+                return;
+            }
+
+            if (!clubId) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Please test dashboard first to get club ID';
+                return;
+            }
+
+            const eventData = {
+                title: document.getElementById('eventTitle').value,
+                description: document.getElementById('eventDescription').value,
+                date: document.getElementById('eventDate').value,
+                venue: document.getElementById('eventVenue').value,
+                capacity: parseInt(document.getElementById('eventCapacity').value),
+                club_id: clubId
+            };
+
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Creating event...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/coordinator/events`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(eventData),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✅ Event created successfully!\n\n${JSON.stringify(data.data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ Event creation failed: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ Network error: ${error.message}`;
+            }
+        }
+
+        function openFrontend() {
+            window.open('http://localhost:5174/', '_blank');
+        }
+
+        function openCoordinatorLogin() {
+            window.open('http://localhost:5174/login', '_blank');
+        }
+    </script>
+</body>
+</html>

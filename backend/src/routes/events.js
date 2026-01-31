@@ -6,7 +6,8 @@ const {
   getEvent, 
   approveEvent, 
   rejectEvent, 
-  updateEvent 
+  updateEvent,
+  deleteEvent
 } = require('../controllers/eventController');
 const { authenticateToken, requireAdmin, requireClubLeadOrAdmin } = require('../middleware/auth');
 const { validate, eventSchema, eventUpdateSchema } = require('../utils/validation');
@@ -18,6 +19,7 @@ router.get('/:id', getEvent);
 // Protected routes
 router.post('/', authenticateToken, requireClubLeadOrAdmin, validate(eventSchema), createEvent);
 router.put('/:id', authenticateToken, requireClubLeadOrAdmin, validate(eventUpdateSchema), updateEvent);
+router.delete('/:id', authenticateToken, requireClubLeadOrAdmin, deleteEvent);
 
 // Admin only routes
 router.put('/:id/approve', authenticateToken, requireAdmin, approveEvent);

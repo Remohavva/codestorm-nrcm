@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinator System Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #111827;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #065f46; }
+        .error { background: #7f1d1d; }
+        .info { background: #1e3a8a; }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coordinator System Test</h1>
+        
+        <div class="status info">
+            <h3>System Status:</h3>
+            <p>Frontend: <strong>http://localhost:5174</strong></p>
+            <p>Backend: <strong>http://localhost:3002</strong></p>
+        </div>
+
+        <div class="status" id="frontend-status">
+            <h3>Frontend Status:</h3>
+            <p id="frontend-message">Testing...</p>
+        </div>
+
+        <div class="status" id="backend-status">
+            <h3>Backend Status:</h3>
+            <p id="backend-message">Testing...</p>
+        </div>
+
+        <div class="status" id="coordinator-api-status">
+            <h3>Coordinator API Status:</h3>
+            <p id="coordinator-message">Testing...</p>
+        </div>
+
+        <h3>Quick Links:</h3>
+        <button class="button" onclick="window.open('http://localhost:5174', '_blank')">Frontend Home</button>
+        <button class="button" onclick="window.open('http://localhost:5174/login', '_blank')">Login Page</button>
+        <button class="button" onclick="window.open('http://localhost:5174/coordinator/dashboard', '_blank')">Coordinator Dashboard</button>
+
+        <h3>Test Coordinator Features:</h3>
+        <button class="button" onclick="testCoordinatorAPI()">Test Coordinator API</button>
+        <button class="button" onclick="testEventCreation()">Test Event Creation</button>
+
+        <div id="test-results" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        // Test frontend
+        fetch('http://localhost:5174')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('frontend-status').className = 'status success';
+                    document.getElementById('frontend-message').textContent = '✅ Frontend is accessible';
+                } else {
+                    document.getElementById('frontend-status').className = 'status error';
+                    document.getElementById('frontend-message').textContent = '❌ Frontend responded with error';
+                }
+            })
+            .catch(error => {
+                document.getElementById('frontend-status').className = 'status error';
+                document.getElementById('frontend-message').textContent = '❌ Cannot reach frontend: ' + error.message;
+            });
+
+        // Test backend
+        fetch('http://localhost:3002/health')
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('backend-status').className = 'status success';
+                    document.getElementById('backend-message').textContent = '✅ Backend is running';
+                } else {
+                    document.getElementById('backend-status').className = 'status error';
+                    document.getElementById('backend-message').textContent = '❌ Backend error';
+                }
+            })
+            .catch(error => {
+                document.getElementById('backend-status').className = 'status error';
+                document.getElementById('backend-message').textContent = '❌ Backend not accessible: ' + error.message;
+            });
+
+        // Test coordinator API (without auth for now)
+        fetch('http://localhost:3002/api/coordinator/dashboard')
+            .then(response => {
+                if (response.status === 401) {
+                    document.getElementById('coordinator-api-status').className = 'status success';
+                    document.getElementById('coordinator-message').textContent = '✅ Coordinator API is working (requires auth)';
+                } else if (response.ok) {
+                    document.getElementById('coordinator-api-status').className = 'status success';
+                    document.getElementById('coordinator-message').textContent = '✅ Coordinator API is accessible';
+                } else {
+                    document.getElementById('coordinator-api-status').className = 'status error';
+                    document.getElementById('coordinator-message').textContent = '❌ Coordinator API error: ' + response.status;
+                }
+            })
+            .catch(error => {
+                document.getElementById('coordinator-api-status').className = 'status error';
+                document.getElementById('coordinator-message').textContent = '❌ Coordinator API not accessible: ' + error.message;
+            });
+
+        function testCoordinatorAPI() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h4>Testing Coordinator API Endpoints...</h4>';
+            
+            const endpoints = [
+                '/api/coordinator/dashboard',
+                '/api/coordinator/clubs',
+                '/api/coordinator/events'
+            ];
+
+            endpoints.forEach(endpoint => {
+                fetch('http://localhost:3002' + endpoint)
+                    .then(response => {
+                        const status = response.status === 401 ? 'Protected (Good)' : 'Status: ' + response.status;
+                        results.innerHTML += `<p>✅ ${endpoint}: ${status}</p>`;
+                    })
+                    .catch(error => {
+                        results.innerHTML += `<p>❌ ${endpoint}: ${error.message}</p>`;
+                    });
+            });
+        }
+
+        function testEventCreation() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<h4>Event Creation Test</h4>';
+            results.innerHTML += '<p>This would test event creation with proper authentication.</p>';
+            results.innerHTML += '<p>Login as a coordinator first, then use the dashboard.</p>';
+        }
+    </script>
+</body>
+</html>

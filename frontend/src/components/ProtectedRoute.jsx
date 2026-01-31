@@ -24,8 +24,15 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   // Check specific role requirements
-  if (requiredRole && user.role !== requiredRole) {
-    return <Navigate to="/student/dashboard" replace />;
+  if (requiredRole) {
+    // Handle club_lead role requirement (allow both club_lead and admin)
+    if (requiredRole === 'club_lead' && !['club_lead', 'admin'].includes(user.role)) {
+      return <Navigate to="/login" state={{ error: 'Access denied. Club coordinator access required.' }} replace />;
+    }
+    // Handle other specific role requirements
+    else if (requiredRole !== 'club_lead' && user.role !== requiredRole) {
+      return <Navigate to="/login" state={{ error: 'Access denied. Insufficient permissions.' }} replace />;
+    }
   }
 
   return children;

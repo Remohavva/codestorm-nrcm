@@ -1,18 +1,37 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { HiMail, HiLockClosed, HiArrowRight, HiUserGroup } from 'react-icons/hi';
+import { useAuth } from '../contexts/AuthContext';
 import GlassCard from '../components/GlassCard';
 import './Login.css';
 
 function CoordinatorLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock authentication - navigate to coordinator dashboard
-    navigate('/coordinator/dashboard');
+    setLoading(true);
+    setError('');
+
+    try {
+      const user = await login(email, password);
+      
+      // Check if user is a club lead or admin
+      if (user.role === 'club_lead' || user.role === 'admin') {
+        navigate('/coordinator/dashboard');
+      } else {
+        setError('Access denied. Only club coordinators can access this portal.');
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -62,6 +81,20 @@ function CoordinatorLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="login-form">
+            {error && (
+              <div className="error-message" style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.2)',
+                color: '#f87171',
+                padding: '12px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                fontSize: '14px'
+              }}>
+                {error}
+              </div>
+            )}
+
             {/* Email Input */}
             <div className="input-wrapper">
               <label htmlFor="email">Email</label>
@@ -74,6 +107,7 @@ function CoordinatorLogin() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="coordinator@university.edu"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -95,15 +129,29 @@ function CoordinatorLogin() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  disabled={loading}
                 />
               </div>
             </div>
 
             {/* Submit Button */}
-            <button type="submit" className="login-submit-btn">
-              <span>Sign in</span>
-              <HiArrowRight size={20} />
+            <button type="submit" className="login-submit-btn" disabled={loading}>
+              <span>{loading ? 'Signing in...' : 'Sign in'}</span>
+              {!loading && <HiArrowRight size={20} />}
             </button>
+
+            {/* Demo Info */}
+            <div style={{
+              marginTop: '16px',
+              padding: '12px',
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: '8px',
+              fontSize: '12px',
+              color: '#93c5fd'
+            }}>
+              Demo: Use coordinator@university.edu with password "password123"
+            </div>
 
             {/* Note about no signup */}
             <div className="coordinator-note">

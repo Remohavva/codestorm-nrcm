@@ -312,11 +312,80 @@ const updateEvent = async (req, res, next) => {
   }
 };
 
+// Delete event (club lead or admin only)
+const deleteEvent = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Get event to check ownership
+    const { data: event, error: fetchError } = await supabaseAdmin
+      .from('events')
+      .select(`
+        *,
+        club:clubs(lead_id)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Event not found'
+        });
+      }
+      throw fetchError;
+    }
+
+    // Check permissions
+    if (req.user.role !== 'admin' && event.club.lead_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete events for your own clubs'
+      });
+    }
+
+    // Check if event has registrations
+    const { data: registrations, error: regError } = await supabaseAdmin
+      .from('registrations')
+      .select('id')
+      .eq('event_id', id)
+      .eq('status', 'registered');
+
+    if (regError) throw regError;
+
+    if (registrations.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot delete event with ${registrations.length} active registrations. Cancel registrations first.`
+      });
+    }
+
+    // Delete event
+    const { error: deleteError } = await supabaseAdmin
+      .from('events')
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) {
+      throw deleteError;
+    }
+
+    res.json({
+      success: true,
+      message: 'Event deleted successfully'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createEvent,
   getEvents,
   getEvent,
   approveEvent,
   rejectEvent,
-  updateEvent
+  updateEvent,
+  deleteEvent
 };

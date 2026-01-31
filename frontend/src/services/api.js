@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3002';
 
 // Create axios instance
 const api = axios.create({
@@ -80,6 +80,17 @@ export const adminAPI = {
   getPendingEvents: () => api.get('/api/admin/events/pending'),
   getAllUsers: (params) => api.get('/api/admin/users', { params }),
   updateUserRole: (userId, role) => api.put(`/api/admin/users/${userId}/role`, { role }),
+};
+
+// Coordinator API
+export const coordinatorAPI = {
+  getDashboard: () => api.get('/api/coordinator/dashboard'),
+  getMyClubs: () => api.get('/api/coordinator/clubs'),
+  getMyEvents: (params) => api.get('/api/coordinator/events', { params }),
+  createEvent: (data) => api.post('/api/coordinator/events', data),
+  updateEvent: (id, data) => api.put(`/api/coordinator/events/${id}`, data),
+  deleteEvent: (id) => api.delete(`/api/coordinator/events/${id}`),
+  getEventRegistrations: (id) => api.get(`/api/coordinator/events/${id}/registrations`),
 };
 
 export default api;
