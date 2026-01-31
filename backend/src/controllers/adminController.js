@@ -274,10 +274,65 @@ const getPendingEvents = async (req, res, next) => {
   }
 };
 
+// Update event status (approve/reject)
+const updateEventStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validate status
+    if (!['approved', 'rejected'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be "approved" or "rejected"'
+      });
+    }
+
+    // Check if event exists
+    const { data: existingEvent, error: checkError } = await supabaseAdmin
+      .from('events')
+      .select('id, title, status')
+      .eq('id', id)
+      .single();
+
+    if (checkError) {
+      if (checkError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Event not found'
+        });
+      }
+      throw checkError;
+    }
+
+    // Update event status
+    const { data: updatedEvent, error: updateError } = await supabaseAdmin
+      .from('events')
+      .update({ 
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateError) throw updateError;
+
+    res.json({
+      success: true,
+      message: `Event ${status} successfully`,
+      data: { event: updatedEvent }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getAnalytics,
   getAllEvents,
   getAllUsers,
   updateUserRole,
-  getPendingEvents
+  getPendingEvents,
+  updateEventStatus
 };
