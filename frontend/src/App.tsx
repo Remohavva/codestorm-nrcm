@@ -6,6 +6,7 @@ import Layout from './components/Layout';
 
 // Pages
 import Login from './pages/Login';
+import LoginDebug from './pages/LoginDebug';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Events from './pages/Events';
@@ -17,6 +18,7 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
+          <Route path="/login-debug" element={<LoginDebug />} />
           <Route path="/register" element={<Register />} />
           
           {/* Protected routes */}
