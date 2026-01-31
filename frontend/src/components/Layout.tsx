@@ -65,7 +65,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <li key={item.name}>
                   <Link
                     to={item.href}
-                    className={`sidebar-item ${
+                    className={`sidebar-item group ${
                       isActive ? 'sidebar-item-active' : 'sidebar-item-inactive'
                     }`}
                   >
