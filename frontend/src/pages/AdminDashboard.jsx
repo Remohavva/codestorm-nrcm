@@ -8,11 +8,7 @@ import {
   HiClock,
   HiExclamationTriangle,
   HiTrendingUp,
-  HiEye,
-  HiRefresh,
-  HiBell,
-  HiChartBar,
-  HiCog
+  HiEye
 } from 'react-icons/hi';
 import { adminAPI } from '../services/api';
 import GlassCard from '../components/GlassCard';
@@ -20,76 +16,47 @@ import Beams from '../components/Beams';
 import EventManagement from '../components/admin/EventManagement';
 import UserManagement from '../components/admin/UserManagement';
 import MonitoringPanel from '../components/admin/MonitoringPanel';
-import AdminAlerts from '../components/admin/AdminAlerts';
-import AdminStats from '../components/admin/AdminStats';
-import SystemHealth from '../components/admin/SystemHealth';
 
 function AdminDashboard() {
-  const [dashboardData, setDashboardData] = useState(null);
-  const [alerts, setAlerts] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
-  const [lastUpdate, setLastUpdate] = useState(new Date());
 
   useEffect(() => {
-    fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 30000); // Auto-refresh every 30 seconds
-    return () => clearInterval(interval);
+    fetchAnalytics();
   }, []);
 
-  const fetchDashboardData = async () => {
+  const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const [dashboardResponse, alertsResponse] = await Promise.all([
-        adminAPI.getDashboard(),
-        adminAPI.getAlerts()
-      ]);
-      
-      setDashboardData(dashboardResponse.data.data);
-      setAlerts(alertsResponse.data.data.alerts);
-      setLastUpdate(new Date());
+      const response = await adminAPI.getAnalytics();
+      setAnalytics(response.data.data);
     } catch (err) {
-      setError('Failed to load dashboard data');
-      console.error('Dashboard error:', err);
+      setError('Failed to load analytics data');
+      console.error('Analytics error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleRefresh = () => {
-    fetchDashboardData();
-  };
-
-  if (loading && !dashboardData) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <div className="text-white text-lg">Loading admin dashboard...</div>
-        </div>
+        <div className="text-white">Loading admin dashboard...</div>
       </div>
     );
   }
 
-  if (error && !dashboardData) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <HiExclamationTriangle className="text-red-400 text-6xl mx-auto mb-4" />
-          <div className="text-red-400 text-xl mb-4">{error}</div>
-          <button
-            onClick={handleRefresh}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Try Again
-          </button>
-        </div>
+        <div className="text-red-400">{error}</div>
       </div>
     );
   }
 
-  const { stats, top_clubs, recent_events, recent_users, system_health, admin_info } = dashboardData || {};
+  const { stats, top_clubs } = analytics;
 
   return (
     <div className="min-h-screen bg-gray-900 relative">
@@ -110,56 +77,25 @@ function AdminDashboard() {
       <div className="relative z-10 p-6">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
-              <p className="text-gray-400">
-                Welcome back, {admin_info?.admin_name || 'Administrator'}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right text-sm text-gray-400">
-                <div>Last updated: {lastUpdate.toLocaleTimeString()}</div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                  <span>System Online</span>
-                </div>
-              </div>
-              <button
-                onClick={handleRefresh}
-                disabled={loading}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-              >
-                <HiRefresh className={loading ? 'animate-spin' : ''} />
-                <span>Refresh</span>
-              </button>
-            </div>
-          </div>
+          <h1 className="text-3xl font-bold text-white mb-2">Admin Dashboard</h1>
+          <p className="text-gray-400">Monitor and manage your campus platform</p>
         </div>
-
-        {/* Alerts Section */}
-        {alerts.length > 0 && (
-          <div className="mb-8">
-            <AdminAlerts alerts={alerts} onRefresh={fetchDashboardData} />
-          </div>
-        )}
 
         {/* Navigation Tabs */}
         <div className="mb-8">
           <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-lg backdrop-blur-sm border border-gray-700">
             {[
-              { id: 'overview', label: 'Overview', icon: HiChartBar },
+              { id: 'overview', label: 'Overview', icon: HiTrendingUp },
               { id: 'events', label: 'Events', icon: HiCalendar },
               { id: 'users', label: 'Users', icon: HiUsers },
-              { id: 'monitoring', label: 'Monitoring', icon: HiEye },
-              { id: 'system', label: 'System', icon: HiCog }
+              { id: 'monitoring', label: 'Monitoring', icon: HiEye }
             ].map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
                   activeTab === tab.id
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }`}
               >
@@ -170,142 +106,100 @@ function AdminDashboard() {
           </div>
         </div>
 
-        {/* Tab Content */}
+        {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* Key Metrics */}
-            <AdminStats stats={stats} />
-
-            {/* Charts and Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* User Breakdown Chart */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <GlassCard className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">User Distribution</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-blue-500 rounded"></div>
-                      <span className="text-gray-300">Students</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-medium">{stats?.user_breakdown?.students || 0}</div>
-                      <div className="text-xs text-gray-400">
-                        {stats?.overview?.total_users > 0 
-                          ? Math.round((stats.user_breakdown.students / stats.overview.total_users) * 100)
-                          : 0}%
-                      </div>
-                    </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Total Users</p>
+                    <p className="text-2xl font-bold text-white">{stats.overview.total_users}</p>
+                    <p className="text-green-400 text-sm">+{stats.recent_activity.new_users_30d} this month</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-purple-500 rounded"></div>
-                      <span className="text-gray-300">Club Leaders</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-medium">{stats?.user_breakdown?.club_leads || 0}</div>
-                      <div className="text-xs text-gray-400">
-                        {stats?.overview?.total_users > 0 
-                          ? Math.round((stats.user_breakdown.club_leads / stats.overview.total_users) * 100)
-                          : 0}%
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-red-500 rounded"></div>
-                      <span className="text-gray-300">Admins</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-medium">{stats?.user_breakdown?.admins || 0}</div>
-                      <div className="text-xs text-gray-400">
-                        {stats?.overview?.total_users > 0 
-                          ? Math.round((stats.user_breakdown.admins / stats.overview.total_users) * 100)
-                          : 0}%
-                      </div>
-                    </div>
-                  </div>
+                  <HiUsers className="text-blue-400" size={32} />
                 </div>
               </GlassCard>
 
-              {/* Event Status Chart */}
               <GlassCard className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Event Status</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <HiCheckCircle className="text-green-400" size={16} />
-                      <span className="text-gray-300">Approved</span>
-                    </div>
-                    <span className="text-white font-medium">{stats?.event_status?.approved || 0}</span>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Total Clubs</p>
+                    <p className="text-2xl font-bold text-white">{stats.overview.total_clubs}</p>
+                    <p className="text-green-400 text-sm">+{stats.recent_activity.new_clubs_30d} this month</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <HiClock className="text-yellow-400" size={16} />
-                      <span className="text-gray-300">Pending</span>
-                    </div>
-                    <span className="text-white font-medium">{stats?.event_status?.pending || 0}</span>
+                  <HiUserGroup className="text-purple-400" size={32} />
+                </div>
+              </GlassCard>
+
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Total Events</p>
+                    <p className="text-2xl font-bold text-white">{stats.overview.total_events}</p>
+                    <p className="text-green-400 text-sm">+{stats.recent_activity.new_events_30d} this month</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <HiExclamationTriangle className="text-red-400" size={16} />
-                      <span className="text-gray-300">Rejected</span>
-                    </div>
-                    <span className="text-white font-medium">{stats?.event_status?.rejected || 0}</span>
+                  <HiCalendar className="text-green-400" size={32} />
+                </div>
+              </GlassCard>
+
+              <GlassCard className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">Registrations</p>
+                    <p className="text-2xl font-bold text-white">{stats.overview.total_registrations}</p>
+                    <p className="text-green-400 text-sm">+{stats.recent_activity.new_registrations_30d} this month</p>
                   </div>
+                  <HiClipboardList className="text-yellow-400" size={32} />
                 </div>
               </GlassCard>
             </div>
 
-            {/* Recent Activity */}
+            {/* User Breakdown & Event Status */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Recent Events */}
               <GlassCard className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Recent Events</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">User Breakdown</h3>
                 <div className="space-y-3">
-                  {recent_events?.slice(0, 5).map(event => (
-                    <div key={event.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-                      <div>
-                        <div className="text-white font-medium">{event.title}</div>
-                        <div className="text-gray-400 text-sm">
-                          {event.clubs?.name} • {new Date(event.date).toLocaleDateString()}
-                        </div>
-                      </div>
-                      <div className={`px-2 py-1 rounded text-xs ${
-                        event.status === 'approved' ? 'bg-green-600/20 text-green-400' :
-                        event.status === 'pending' ? 'bg-yellow-600/20 text-yellow-400' :
-                        'bg-red-600/20 text-red-400'
-                      }`}>
-                        {event.status}
-                      </div>
-                    </div>
-                  ))}
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Students</span>
+                    <span className="text-white font-medium">{stats.user_breakdown.students}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Club Leaders</span>
+                    <span className="text-white font-medium">{stats.user_breakdown.club_leads}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-400">Admins</span>
+                    <span className="text-white font-medium">{stats.user_breakdown.admins}</span>
+                  </div>
                 </div>
               </GlassCard>
 
-              {/* Recent Users */}
               <GlassCard className="p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Recent Users</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Event Status</h3>
                 <div className="space-y-3">
-                  {recent_users?.slice(0, 5).map(user => (
-                    <div key={user.id} className="flex items-center space-x-3 p-3 bg-gray-800/50 rounded-lg">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-semibold">
-                          {user.name.charAt(0).toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <div className="text-white font-medium">{user.name}</div>
-                        <div className="text-gray-400 text-sm">{user.email}</div>
-                      </div>
-                      <div className={`px-2 py-1 rounded text-xs ${
-                        user.role === 'admin' ? 'bg-red-600/20 text-red-400' :
-                        user.role === 'club_lead' ? 'bg-purple-600/20 text-purple-400' :
-                        'bg-blue-600/20 text-blue-400'
-                      }`}>
-                        {user.role.replace('_', ' ')}
-                      </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <HiCheckCircle className="text-green-400" size={16} />
+                      <span className="text-gray-400">Approved</span>
                     </div>
-                  ))}
+                    <span className="text-white font-medium">{stats.event_status.approved}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <HiClock className="text-yellow-400" size={16} />
+                      <span className="text-gray-400">Pending</span>
+                    </div>
+                    <span className="text-white font-medium">{stats.event_status.pending}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center space-x-2">
+                      <HiExclamationTriangle className="text-red-400" size={16} />
+                      <span className="text-gray-400">Rejected</span>
+                    </div>
+                    <span className="text-white font-medium">{stats.event_status.rejected}</span>
+                  </div>
                 </div>
               </GlassCard>
             </div>
@@ -314,20 +208,13 @@ function AdminDashboard() {
             <GlassCard className="p-6">
               <h3 className="text-lg font-semibold text-white mb-4">Top Active Clubs</h3>
               <div className="space-y-3">
-                {top_clubs?.map((club, index) => (
-                  <div key={club.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                {top_clubs.map((club, index) => (
+                  <div key={club.id} className="flex justify-between items-center">
                     <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center">
-                        <span className="text-white text-sm font-bold">#{index + 1}</span>
-                      </div>
-                      <div>
-                        <div className="text-white font-medium">{club.name}</div>
-                        <div className="text-gray-400 text-sm">
-                          Lead: {club.users?.name || 'No lead assigned'}
-                        </div>
-                      </div>
+                      <span className="text-gray-500 text-sm">#{index + 1}</span>
+                      <span className="text-white">{club.name}</span>
                     </div>
-                    <div className="text-blue-400 font-medium">{club.event_count} events</div>
+                    <span className="text-blue-400 font-medium">{club.event_count} events</span>
                   </div>
                 ))}
               </div>
@@ -335,10 +222,12 @@ function AdminDashboard() {
           </div>
         )}
 
+        {/* Other tabs will be implemented in separate components */}
         {activeTab === 'events' && <EventManagement />}
+
         {activeTab === 'users' && <UserManagement />}
+
         {activeTab === 'monitoring' && <MonitoringPanel />}
-        {activeTab === 'system' && <SystemHealth systemHealth={system_health} />}
       </div>
     </div>
   );
