@@ -16,6 +16,7 @@ const coordinatorRoutes = require('./routes/coordinator');
 const communityRoutes = require('./routes/community');
 const chatRoutes = require('./routes/chat');
 const uploadRoutes = require('./routes/upload');
+const certificateRoutes = require('./routes/certificates');
 
 const app = express();
 
@@ -66,6 +67,7 @@ app.use('/api/coordinator', coordinatorRoutes);
 app.use('/api/community', communityRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 // 404 handler
 app.use(notFound);

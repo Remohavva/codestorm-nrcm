@@ -25,6 +25,15 @@ export const API_ENDPOINTS = {
   // Events
   EVENTS: '/events',
   EVENT: (id) => `/events/${id}`,
+  EVENT_REGISTER: (id) => `/events/${id}/register`,
+  EVENT_UNREGISTER: (id) => `/events/${id}/unregister`,
+  
+  // Clubs
+  CLUBS: '/clubs',
+  CLUB: (id) => `/clubs/${id}`,
+  CLUB_JOIN: (id) => `/clubs/${id}/join`,
+  CLUB_LEAVE: (id) => `/clubs/${id}/leave`,
+  CLUB_MEMBERS: (id) => `/clubs/${id}/members`,
   
   // Admin
   ADMIN_ANALYTICS: '/admin/analytics',
@@ -48,4 +57,11 @@ export const API_ENDPOINTS = {
   
   // Upload
   UPLOAD_IMAGE: '/upload/image',
+  
+  // Certificates
+  CERTIFICATES: '/certificates',
+  CERTIFICATE_GENERATE: (registrationId) => `/certificates/generate/${registrationId}`,
+  CERTIFICATE_DOWNLOAD: (certificateId) => `/certificates/${certificateId}/download`,
+  CERTIFICATE_VERIFY: (certificateId) => `/certificates/${certificateId}/verify`,
+  MY_CERTIFICATES: '/certificates/my-certificates',
 };

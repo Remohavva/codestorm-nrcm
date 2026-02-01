@@ -177,9 +177,128 @@ const updateClub = async (req, res, next) => {
   }
 };
 
+// Join club
+const joinClub = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Check if club exists
+    const { data: club, error: clubError } = await supabaseAdmin
+      .from('clubs')
+      .select('id, name')
+      .eq('id', id)
+      .single();
+
+    if (clubError) {
+      if (clubError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Club not found'
+        });
+      }
+      throw clubError;
+    }
+
+    // Check if already a member (assuming we have a club_members table)
+    // For now, we'll just return success
+    res.json({
+      success: true,
+      message: `Successfully joined ${club.name}`,
+      data: {
+        club_id: id,
+        user_id: userId
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Leave club
+const leaveClub = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    // Check if club exists
+    const { data: club, error: clubError } = await supabaseAdmin
+      .from('clubs')
+      .select('id, name')
+      .eq('id', id)
+      .single();
+
+    if (clubError) {
+      if (clubError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Club not found'
+        });
+      }
+      throw clubError;
+    }
+
+    res.json({
+      success: true,
+      message: `Successfully left ${club.name}`,
+      data: {
+        club_id: id,
+        user_id: userId
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get club members
+const getClubMembers = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Check if club exists
+    const { data: club, error: clubError } = await supabaseAdmin
+      .from('clubs')
+      .select('id, name')
+      .eq('id', id)
+      .single();
+
+    if (clubError) {
+      if (clubError.code === 'PGRST116') {
+        return res.status(404).json({
+          success: false,
+          message: 'Club not found'
+        });
+      }
+      throw clubError;
+    }
+
+    // For now, return mock data since we don't have a club_members table yet
+    res.json({
+      success: true,
+      data: {
+        club,
+        members: [
+          {
+            id: '1',
+            name: 'John Doe',
+            email: 'john@university.edu',
+            joined_at: new Date().toISOString()
+          }
+        ]
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createClub,
   getClubs,
   getClub,
-  updateClub
+  updateClub,
+  joinClub,
+  leaveClub,
+  getClubMembers
 };

@@ -1,4 +1,5 @@
 const { supabaseAdmin } = require('../utils/supabase');
+const certificateService = require('../services/certificateService');
 
 // Register for an event
 const registerForEvent = async (req, res, next) => {
@@ -9,7 +10,19 @@ const registerForEvent = async (req, res, next) => {
     // Check if event exists and is approved
     const { data: event, error: eventError } = await supabaseAdmin
       .from('events')
-      .select('id, title, capacity, status, date')
+      .select(`
+        id, 
+        title, 
+        capacity, 
+        status, 
+        date, 
+        venue,
+        club:clubs(
+          id,
+          name,
+          lead:users!lead_id(name)
+        )
+      `)
       .eq('id', event_id)
       .single();
 
@@ -85,7 +98,13 @@ const registerForEvent = async (req, res, next) => {
         .eq('id', existingRegistration.id)
         .select(`
           *,
-          event:events(id, title, date, venue),
+          event:events(
+            id, title, date, venue,
+            club:clubs(
+              id, name,
+              lead:users!lead_id(name)
+            )
+          ),
           user:users(id, name, email)
         `)
         .single();
@@ -94,13 +113,50 @@ const registerForEvent = async (req, res, next) => {
         throw updateError;
       }
 
-      return res.json({
-        success: true,
-        message: 'Successfully registered for event',
-        data: {
-          registration: updatedRegistration
-        }
-      });
+      // Generate certificate for re-registration
+      try {
+        const certificate = await certificateService.createCertificate(
+          updatedRegistration,
+          updatedRegistration.event,
+          updatedRegistration.user
+        );
+
+        return res.json({
+          success: true,
+          message: 'Successfully registered for event',
+          data: {
+            registration: updatedRegistration,
+            certificate: {
+              id: certificate.certificateId,
+              downloadUrl: `/api/certificates/${certificate.certificateId}/download`,
+              verifyUrl: `/api/certificates/${certificate.certificateId}/verify`
+            }
+          }
+        });
+      } catch (certError) {
+        console.error('Certificate generation error:', certError);
+        // Return success even if certificate fails
+        return res.json({
+          success: true,
+          message: 'Successfully registered for event',
+          data: {
+            registration: updatedRegistration,
+            certificate: null,
+            certificateError: 'Certificate generation failed, but registration is complete'
+          }
+        });
+      }
+    }
+
+    // Get user details for certificate
+    const { data: user, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id, name, email')
+      .eq('id', user_id)
+      .single();
+
+    if (userError) {
+      throw userError;
     }
 
     // Create new registration
@@ -113,7 +169,13 @@ const registerForEvent = async (req, res, next) => {
       }])
       .select(`
         *,
-        event:events(id, title, date, venue),
+        event:events(
+          id, title, date, venue,
+          club:clubs(
+            id, name,
+            lead:users!lead_id(name)
+          )
+        ),
         user:users(id, name, email)
       `)
       .single();
@@ -122,13 +184,39 @@ const registerForEvent = async (req, res, next) => {
       throw registrationError;
     }
 
-    res.status(201).json({
-      success: true,
-      message: 'Successfully registered for event',
-      data: {
-        registration
-      }
-    });
+    // Generate certificate automatically
+    try {
+      const certificate = await certificateService.createCertificate(
+        registration,
+        registration.event,
+        registration.user
+      );
+
+      res.status(201).json({
+        success: true,
+        message: 'Successfully registered for event and certificate generated',
+        data: {
+          registration,
+          certificate: {
+            id: certificate.certificateId,
+            downloadUrl: `/api/certificates/${certificate.certificateId}/download`,
+            verifyUrl: `/api/certificates/${certificate.certificateId}/verify`
+          }
+        }
+      });
+    } catch (certError) {
+      console.error('Certificate generation error:', certError);
+      // Return success even if certificate fails
+      res.status(201).json({
+        success: true,
+        message: 'Successfully registered for event',
+        data: {
+          registration,
+          certificate: null,
+          certificateError: 'Certificate generation failed, but registration is complete'
+        }
+      });
+    }
   } catch (error) {
     next(error);
   }

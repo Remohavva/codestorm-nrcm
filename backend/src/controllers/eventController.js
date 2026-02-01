@@ -73,7 +73,7 @@ const createEvent = async (req, res, next) => {
 // Get all events with filters
 const getEvents = async (req, res, next) => {
   try {
-    const { status, club_id, upcoming } = req.query;
+    const { status, club_id, upcoming, past } = req.query;
     
     let query = supabaseAdmin
       .from('events')
@@ -96,8 +96,15 @@ const getEvents = async (req, res, next) => {
     if (upcoming === 'true') {
       query = query.gte('date', new Date().toISOString());
     }
+    
+    if (past === 'true') {
+      // For past events, we want events that happened before today
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of today
+      query = query.lt('date', today.toISOString());
+    }
 
-    const { data: events, error } = await query.order('date', { ascending: true });
+    const { data: events, error } = await query.order('date', { ascending: past === 'true' ? false : true });
 
     if (error) {
       throw error;

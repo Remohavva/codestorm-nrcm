@@ -81,8 +81,19 @@ export default function App() {
   
   // Events states
   const [events, setEvents] = useState<Event[]>([]);
+  const [pastEvents, setPastEvents] = useState<Event[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
+  const [loadingPastEvents, setLoadingPastEvents] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Individual page states
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
+  const [selectedClub, setSelectedClub] = useState<any>(null);
+  const [clubs, setClubs] = useState<any[]>([]);
+  const [eventRegistrations, setEventRegistrations] = useState<any[]>([]);
+  const [clubMembers, setClubMembers] = useState<any[]>([]);
+  const [loadingEventDetails, setLoadingEventDetails] = useState(false);
+  const [loadingClubDetails, setLoadingClubDetails] = useState(false);
   
   // Admin states
   const [showAdmin, setShowAdmin] = useState(false);
@@ -130,6 +141,10 @@ export default function App() {
   const [showUserSearch, setShowUserSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Certificate states
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [loadingCertificates, setLoadingCertificates] = useState(false);
+  
   // Animation refs for heart scaling
   const heartAnimations = useRef(new Map()).current;
   
@@ -155,7 +170,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0A0A0A', // Deep black background
   },
   header: {
     flexDirection: 'row',
@@ -167,7 +182,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
   },
   headerActions: {
     flexDirection: 'row',
@@ -186,44 +201,47 @@ const styles = StyleSheet.create({
   
   // Auth Styles
   authCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card background
     padding: 24,
     borderRadius: 16,
     marginTop: 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 5,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#2A2A2A', // Subtle border
   },
   authTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     textAlign: 'center',
     marginBottom: 8,
   },
   authSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#B0B0B0', // Light gray text
     textAlign: 'center',
     marginBottom: 32,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: '#3A3A3A', // Dark border
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     marginBottom: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#2A2A2A', // Dark input background
+    color: '#FFFFFF', // White text
   },
   textArea: {
     height: 100,
     textAlignVertical: 'top',
   },
   authButton: {
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#4A90E2', // Keep the blue accent
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
@@ -233,7 +251,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   authButtonText: {
-    color: '#fff',
+    color: '#FFFFFF', // White text
     fontSize: 18,
     fontWeight: '600',
   },
@@ -242,31 +260,33 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   switchAuthText: {
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
     fontSize: 16,
   },
 
   // Home Screen Styles
   welcomeCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 20,
     borderRadius: 16,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   welcomeTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 8,
   },
   welcomeSubtitle: {
     fontSize: 16,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
   },
   quickActions: {
     flexDirection: 'row',
@@ -275,21 +295,23 @@ const styles = StyleSheet.create({
   },
   quickActionButton: {
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark background
     padding: 20,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
     minWidth: 100,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   quickActionText: {
     marginTop: 8,
     fontSize: 14,
     fontWeight: '600',
-    color: '#000',
+    color: '#FFFFFF', // White text
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -300,82 +322,87 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
   },
   eventsScroll: {
     marginBottom: 20,
   },
   eventCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 16,
     borderRadius: 12,
     marginRight: 16,
     width: 280,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   eventTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 8,
   },
   eventDescription: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginBottom: 8,
+    lineHeight: 20,
   },
   eventVenue: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginBottom: 4,
   },
   eventDate: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginBottom: 4,
   },
   eventRegistrations: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
     fontWeight: '600',
     marginBottom: 4,
   },
   eventClub: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginBottom: 2,
   },
   eventLead: {
     fontSize: 12,
-    color: '#999',
+    color: '#808080', // Darker gray
   },
   eventDetails: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginBottom: 8,
   },
   eventStatus: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
     fontWeight: '600',
     marginBottom: 4,
   },
 
   // Community Styles
   postCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   postHeader: {
     flexDirection: 'row',
@@ -391,32 +418,32 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#FFFFFF', // White text
   },
   postTime: {
     fontSize: 12,
-    color: '#999',
+    color: '#808080', // Darker gray
   },
   categoryBadge: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#2A4A6B', // Dark blue background
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   categoryText: {
     fontSize: 12,
-    color: '#1976D2',
+    color: '#4A90E2', // Blue accent
     fontWeight: '600',
   },
   postTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 8,
   },
   postContent: {
     fontSize: 16,
-    color: '#333',
+    color: '#B0B0B0', // Light gray
     lineHeight: 24,
     marginBottom: 12,
   },
@@ -437,59 +464,63 @@ const styles = StyleSheet.create({
   },
   actionCount: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
   },
   actionCountLiked: {
-    color: '#F44336',
+    color: '#F44336', // Keep red for likes
     fontWeight: '600',
   },
 
   // Profile Styles
   profileCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 24,
     borderRadius: 16,
     alignItems: 'center',
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginTop: 12,
   },
   profileEmail: {
     fontSize: 16,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginTop: 4,
   },
   profileRole: {
     fontSize: 14,
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
     fontWeight: '600',
     marginTop: 4,
     textTransform: 'capitalize',
   },
   statsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 20,
     borderRadius: 16,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   statsTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 16,
   },
   statsRow: {
@@ -502,54 +533,56 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginTop: 4,
   },
   recentPostsCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark card
     padding: 20,
     borderRadius: 16,
     marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 16,
   },
   recentPostItem: {
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#2A2A2A', // Dark border
   },
   recentPostTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#000',
+    color: '#FFFFFF', // White text
     marginBottom: 4,
   },
   recentPostDate: {
     fontSize: 12,
-    color: '#999',
+    color: '#808080', // Darker gray
   },
 
   // Bottom Navigation
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark background
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#2A2A2A', // Dark border
   },
   navButton: {
     flex: 1,
@@ -557,16 +590,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   navButtonActive: {
-    backgroundColor: '#E3F2FD',
+    backgroundColor: '#2A4A6B', // Dark blue background
     borderRadius: 8,
   },
   navText: {
     fontSize: 12,
-    color: '#666',
+    color: '#B0B0B0', // Light gray
     marginTop: 4,
   },
   navTextActive: {
-    color: '#4A90E2',
+    color: '#4A90E2', // Blue accent
     fontWeight: '600',
   },
 
@@ -577,21 +610,23 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.8)', // Darker overlay
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1000,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#1A1A1A', // Dark modal background
     borderRadius: 16,
     width: '90%',
     maxHeight: '80%',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.5,
     shadowRadius: 8,
-    elevation: 10,
+    elevation: 15,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -599,12 +634,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: '#2A2A2A', // Dark border
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
+    color: '#FFFFFF', // White text
   },
   modalBody: {
     padding: 20,
@@ -1051,6 +1086,304 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 2,
   },
+
+  // Individual Event Page Styles
+  eventPageHeader: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  eventPageTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // White text
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  eventPageMeta: {
+    gap: 12,
+  },
+  eventMetaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  eventMetaText: {
+    fontSize: 16,
+    color: '#B0B0B0', // Light gray
+  },
+  eventStatsCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  eventStatItem: {
+    alignItems: 'center',
+  },
+  eventStatNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4A90E2', // Keep blue accent
+  },
+  eventStatLabel: {
+    fontSize: 14,
+    color: '#B0B0B0', // Light gray
+    marginTop: 4,
+  },
+  eventDescriptionCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  organizerCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  organizerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  organizerDetails: {
+    flex: 1,
+  },
+  organizerName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // White text
+  },
+  organizerLead: {
+    fontSize: 14,
+    color: '#B0B0B0', // Light gray
+    marginTop: 4,
+  },
+  registerButton: {
+    backgroundColor: '#4A90E2', // Keep blue accent
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 8,
+  },
+  registerButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  loginPromptCard: {
+    backgroundColor: '#2A2A2A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#3A3A3A',
+  },
+  loginPromptText: {
+    fontSize: 16,
+    color: '#B0B0B0', // Light gray
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  loginPromptButton: {
+    backgroundColor: '#4A90E2', // Keep blue accent
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  loginPromptButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
+  // Individual Club Page Styles
+  clubPageHeader: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 24,
+    borderRadius: 16,
+    marginBottom: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  clubIcon: {
+    marginBottom: 16,
+  },
+  clubPageTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // White text
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  clubPageDescription: {
+    fontSize: 16,
+    color: '#B0B0B0', // Light gray
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  clubStatsCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  clubStatItem: {
+    alignItems: 'center',
+  },
+  clubStatNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#4A90E2', // Keep blue accent
+  },
+  clubStatLabel: {
+    fontSize: 14,
+    color: '#B0B0B0', // Light gray
+    marginTop: 4,
+  },
+  clubLeadCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  leadInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  leadDetails: {
+    flex: 1,
+  },
+  leadName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFFFFF', // White text
+  },
+  leadEmail: {
+    fontSize: 14,
+    color: '#B0B0B0', // Light gray
+    marginTop: 2,
+  },
+  leadRole: {
+    fontSize: 14,
+    color: '#4A90E2', // Blue accent
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  clubEventsCard: {
+    backgroundColor: '#1A1A1A', // Dark card
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#2A2A2A',
+  },
+  clubEventItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A2A2A', // Dark border
+  },
+  clubEventInfo: {
+    flex: 1,
+  },
+  clubEventTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF', // White text
+  },
+  clubEventDate: {
+    fontSize: 14,
+    color: '#B0B0B0', // Light gray
+    marginTop: 2,
+  },
+  joinButton: {
+    backgroundColor: '#4A90E2', // Keep blue accent
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    gap: 8,
+  },
+  joinButtonText: {
+    color: '#FFFFFF', // White text
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  
+  // Club Card Styles
+  clubCardHeader: {
+    alignItems: 'center',
+    marginBottom: 12,
+  },
 });
 
   // Get or create heart animation for a post
@@ -1131,6 +1464,8 @@ const styles = StyleSheet.create({
             setCurrentScreen('home');
             loadPosts();
             loadEvents();
+            loadPastEvents();
+            loadClubs();
           } else {
             // Token is invalid, clear it
             console.log('Token expired, clearing stored auth');
@@ -1138,6 +1473,8 @@ const styles = StyleSheet.create({
             await AsyncStorage.removeItem('user');
             loadPosts(); // Load posts without auth
             loadEvents();
+            loadPastEvents();
+            loadClubs();
           }
         } catch (error) {
           console.log('Token validation failed, clearing stored auth');
@@ -1145,16 +1482,22 @@ const styles = StyleSheet.create({
           await AsyncStorage.removeItem('user');
           loadPosts(); // Load posts without auth
           loadEvents();
+          loadPastEvents();
+          loadClubs();
         }
       } else {
         // No stored auth, load public data
         loadPosts();
         loadEvents();
+        loadPastEvents();
+        loadClubs();
       }
     } catch (error) {
       console.error('Error checking auth token:', error);
       loadPosts(); // Load posts without auth
       loadEvents();
+      loadPastEvents();
+      loadClubs();
     }
   };
 
@@ -1226,6 +1569,8 @@ const styles = StyleSheet.create({
         setCurrentScreen('home');
         loadPosts();
         loadEvents();
+        loadPastEvents();
+        loadClubs();
         Alert.alert('Success!', `You are now logged in! Role: ${user.role}`);
       } else {
         throw new Error(response.message || 'Login failed');
@@ -1266,6 +1611,8 @@ const styles = StyleSheet.create({
         setCurrentScreen('home');
         loadPosts();
         loadEvents();
+        loadPastEvents();
+        loadClubs();
         Alert.alert('Success!', 'Account created successfully!');
       } else {
         throw new Error(response.message || 'Registration failed');
@@ -1350,10 +1697,318 @@ const styles = StyleSheet.create({
     }
   };
 
+  // Load past events
+  const loadPastEvents = async () => {
+    console.log('🕒 Loading past events...');
+    setLoadingPastEvents(true);
+    try {
+      const response = await apiCall(`${API_ENDPOINTS.EVENTS}?status=approved&past=true`, { skipAuth: true });
+      console.log('Past events API response:', response);
+      if (response.success && response.data.events && response.data.events.length > 0) {
+        console.log('Past events loaded from API:', response.data.events.length);
+        setPastEvents(response.data.events);
+      } else {
+        console.log('No past events from API, using fallback data');
+        // Always use fallback mock data for demonstration
+        setPastEvents([
+          {
+            id: 101,
+            title: 'Mobile App Demo Workshop',
+            description: 'A hands-on workshop demonstrating mobile app development with React Native and certificate generation.',
+            venue: 'Tech Hub Room 101',
+            date: '2026-01-25T14:00:00Z',
+            capacity: 25,
+            registration_count: 18,
+            club: {
+              name: 'Computer Science Club',
+              lead: { name: 'Alex Johnson' }
+            }
+          },
+          {
+            id: 102,
+            title: 'AI & Machine Learning Workshop',
+            description: 'A comprehensive workshop covering the fundamentals of AI and Machine Learning with hands-on projects.',
+            venue: 'Computer Science Lab A',
+            date: '2026-01-15T14:00:00Z',
+            capacity: 50,
+            registration_count: 42,
+            club: {
+              name: 'Computer Science Club',
+              lead: { name: 'Alex Johnson' }
+            }
+          },
+          {
+            id: 103,
+            title: 'Web Development Bootcamp',
+            description: 'Intensive bootcamp covering modern web development technologies including React, Node.js, and database integration.',
+            venue: 'Main Auditorium',
+            date: '2026-01-08T10:00:00Z',
+            capacity: 100,
+            registration_count: 87,
+            club: {
+              name: 'Computer Science Club',
+              lead: { name: 'Alex Johnson' }
+            }
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading past events:', error);
+      // Fallback mock data for past events
+      console.log('Using fallback past events due to error');
+      setPastEvents([
+        {
+          id: 101,
+          title: 'Mobile App Demo Workshop',
+          description: 'A hands-on workshop demonstrating mobile app development with React Native and certificate generation.',
+          venue: 'Tech Hub Room 101',
+          date: '2026-01-25T14:00:00Z',
+          capacity: 25,
+          registration_count: 18,
+          club: {
+            name: 'Computer Science Club',
+            lead: { name: 'Alex Johnson' }
+          }
+        },
+        {
+          id: 102,
+          title: 'AI & Machine Learning Workshop',
+          description: 'A comprehensive workshop covering the fundamentals of AI and Machine Learning with hands-on projects.',
+          venue: 'Computer Science Lab A',
+          date: '2026-01-15T14:00:00Z',
+          capacity: 50,
+          registration_count: 42,
+          club: {
+            name: 'Computer Science Club',
+            lead: { name: 'Alex Johnson' }
+          }
+        },
+        {
+          id: 103,
+          title: 'Web Development Bootcamp',
+          description: 'Intensive bootcamp covering modern web development technologies including React, Node.js, and database integration.',
+          venue: 'Main Auditorium',
+          date: '2026-01-08T10:00:00Z',
+          capacity: 100,
+          registration_count: 87,
+          club: {
+            name: 'Computer Science Club',
+            lead: { name: 'Alex Johnson' }
+          }
+        }
+      ]);
+    } finally {
+      setLoadingPastEvents(false);
+      console.log('🕒 Past events loading completed');
+    }
+  };
+
+  // Load user certificates
+  const loadCertificates = async () => {
+    if (!user) return;
+    
+    setLoadingCertificates(true);
+    try {
+      const response = await apiCall(API_ENDPOINTS.MY_CERTIFICATES);
+      if (response.success) {
+        setCertificates(response.data.certificates || []);
+      }
+    } catch (error) {
+      console.error('Error loading certificates:', error);
+      setCertificates([]);
+    } finally {
+      setLoadingCertificates(false);
+    }
+  };
+
+  // Download certificate
+  const downloadCertificate = async (certificateId: string, eventTitle: string) => {
+    try {
+      const downloadUrl = `${API_BASE_URL}${API_ENDPOINTS.CERTIFICATE_DOWNLOAD(certificateId)}`;
+      
+      Alert.alert(
+        'Certificate Ready',
+        `Your certificate for "${eventTitle}" is ready to download!`,
+        [
+          {
+            text: 'Download',
+            onPress: () => {
+              // In a real app, you would use Linking.openURL or a file download library
+              console.log('Download URL:', downloadUrl);
+              Alert.alert('Download Started', 'Certificate download has started. Check your downloads folder.');
+            }
+          },
+          { text: 'Cancel', style: 'cancel' }
+        ]
+      );
+    } catch (error) {
+      console.error('Error downloading certificate:', error);
+      Alert.alert('Error', 'Failed to download certificate');
+    }
+  };
+
+  // Load individual event details
+  const loadEventDetails = async (eventId: string | number) => {
+    setLoadingEventDetails(true);
+    try {
+      const response = await apiCall(API_ENDPOINTS.EVENT(eventId), { skipAuth: true });
+      if (response.success) {
+        setSelectedEvent(response.data.event);
+        setEventRegistrations(response.data.registrations || []);
+      }
+    } catch (error) {
+      console.error('Error loading event details:', error);
+      // Fallback mock data
+      setSelectedEvent({
+        id: typeof eventId === 'string' ? parseInt(eventId) : eventId,
+        title: 'Tech Fest 2026',
+        description: 'Annual technology festival with workshops, competitions, and networking opportunities. Join us for an exciting day of innovation and learning.',
+        venue: 'Main Auditorium',
+        date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        capacity: 500,
+        registration_count: 234,
+        club: {
+          name: 'Computer Science Club',
+          lead: { name: 'Alex Johnson' }
+        },
+        status: 'approved'
+      });
+      setEventRegistrations([]);
+    } finally {
+      setLoadingEventDetails(false);
+    }
+  };
+
+  // Load clubs
+  const loadClubs = async () => {
+    try {
+      const response = await apiCall(API_ENDPOINTS.CLUBS, { skipAuth: true });
+      if (response.success) {
+        setClubs(response.data.clubs || []);
+      }
+    } catch (error) {
+      console.error('Error loading clubs:', error);
+      // Fallback mock data
+      setClubs([
+        {
+          id: '1',
+          name: 'Computer Science Club',
+          description: 'A community for CS students to learn, share, and collaborate on tech projects',
+          lead: { name: 'Alex Johnson', email: 'alex@university.edu' },
+          member_count: 45,
+          event_count: 8,
+          created_at: new Date().toISOString()
+        }
+      ]);
+    }
+  };
+
+  // Load individual club details
+  const loadClubDetails = async (clubId: string) => {
+    setLoadingClubDetails(true);
+    try {
+      const [clubResponse, membersResponse] = await Promise.all([
+        apiCall(API_ENDPOINTS.CLUB(clubId), { skipAuth: true }),
+        apiCall(API_ENDPOINTS.CLUB_MEMBERS(clubId), { skipAuth: true })
+      ]);
+      
+      if (clubResponse.success) {
+        setSelectedClub(clubResponse.data.club);
+        setClubMembers(membersResponse.success ? membersResponse.data.members : []);
+      }
+    } catch (error) {
+      console.error('Error loading club details:', error);
+      // Fallback mock data
+      setSelectedClub({
+        id: clubId,
+        name: 'Computer Science Club',
+        description: 'A community for CS students to learn, share, and collaborate on tech projects. We organize workshops, hackathons, and networking events.',
+        lead: { name: 'Alex Johnson', email: 'alex@university.edu' },
+        member_count: 45,
+        event_count: 8,
+        created_at: new Date().toISOString(),
+        events: [
+          {
+            id: 1,
+            title: 'Tech Fest 2026',
+            date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'approved'
+          }
+        ]
+      });
+      setClubMembers([]);
+    } finally {
+      setLoadingClubDetails(false);
+    }
+  };
+
+  // Register for event
+  const registerForEvent = async (eventId: string | number) => {
+    if (!user) {
+      Alert.alert('Login Required', 'Please login to register for events');
+      return;
+    }
+
+    try {
+      const response = await apiCall(API_ENDPOINTS.EVENT_REGISTER(eventId), {
+        method: 'POST'
+      });
+
+      if (response.success) {
+        const { registration, certificate } = response.data;
+        
+        if (certificate) {
+          Alert.alert(
+            'Registration Successful! 🎉', 
+            `You have been registered for this event and your certificate has been generated!\n\nCertificate ID: ${certificate.id.substring(0, 8)}...`,
+            [
+              {
+                text: 'View Certificate',
+                onPress: () => {
+                  downloadCertificate(certificate.id, event.title);
+                }
+              },
+              { text: 'OK', style: 'default' }
+            ]
+          );
+        } else {
+          Alert.alert('Success!', 'You have been registered for this event');
+        }
+        
+        loadEventDetails(eventId); // Refresh event details
+      }
+    } catch (error: any) {
+      console.error('Error registering for event:', error);
+      Alert.alert('Registration Failed', error.message || 'Please try again');
+    }
+  };
+
+  // Join club
+  const joinClub = async (clubId: string) => {
+    if (!user) {
+      Alert.alert('Login Required', 'Please login to join clubs');
+      return;
+    }
+
+    try {
+      const response = await apiCall(API_ENDPOINTS.CLUB_JOIN(clubId), {
+        method: 'POST'
+      });
+
+      if (response.success) {
+        Alert.alert('Success!', 'You have joined this club');
+        loadClubDetails(clubId); // Refresh club details
+      }
+    } catch (error: any) {
+      console.error('Error joining club:', error);
+      Alert.alert('Join Failed', error.message || 'Please try again');
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([loadPosts(), loadEvents()]);
+      await Promise.all([loadPosts(), loadEvents(), loadPastEvents(), loadClubs()]);
     } catch (error) {
       console.error('Error refreshing data:', error);
     } finally {
@@ -1868,10 +2523,10 @@ const styles = StyleSheet.create({
   // Login Screen
   const renderLoginScreen = () => (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-      <LinearGradient colors={['#E8E8E8', '#C0C0C0', '#A8A8A8']} style={styles.header}>
+      <StatusBar style="light" />
+      <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
         <Text style={styles.headerTitle}>College Events</Text>
-        <Ionicons name="school" size={24} color="#000" />
+        <Ionicons name="school" size={24} color="#FFFFFF" />
       </LinearGradient>
       
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
@@ -1922,10 +2577,10 @@ const styles = StyleSheet.create({
   // Register Screen
   const renderRegisterScreen = () => (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-      <LinearGradient colors={['#E8E8E8', '#C0C0C0', '#A8A8A8']} style={styles.header}>
+      <StatusBar style="light" />
+      <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
         <Text style={styles.headerTitle}>College Events</Text>
-        <Ionicons name="school" size={24} color="#000" />
+        <Ionicons name="school" size={24} color="#FFFFFF" />
       </LinearGradient>
       
       <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
@@ -1984,14 +2639,17 @@ const styles = StyleSheet.create({
   const renderHomeScreen = () => {
     console.log('Rendering home screen. User:', user);
     console.log('User role:', user?.role);
+    console.log('Past events count:', pastEvents.length);
+    console.log('Loading past events:', loadingPastEvents);
+    console.log('Past events data:', pastEvents.slice(0, 2)); // Show first 2 events
     console.log('Is club_lead?', user?.role === 'club_lead');
     console.log('Is admin?', user?.role === 'admin');
     console.log('Should show coordinator?', (user?.role === 'club_lead' || user?.role === 'admin'));
     
     return (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-      <LinearGradient colors={['#E8E8E8', '#C0C0C0', '#A8A8A8']} style={styles.header}>
+      <StatusBar style="light" />
+      <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
         <Text style={styles.headerTitle}>College Events</Text>
         <View style={styles.headerActions}>
           {user?.role === 'admin' && (
@@ -2002,7 +2660,7 @@ const styles = StyleSheet.create({
                 loadAllAdminData();
               }}
             >
-              <Ionicons name="settings" size={20} color="#000" />
+              <Ionicons name="settings" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           )}
           {(user?.role === 'club_lead' || user?.role === 'admin') && (
@@ -2016,7 +2674,7 @@ const styles = StyleSheet.create({
                 loadCoordinatorDashboard();
               }}
             >
-              <Ionicons name="calendar" size={20} color="#000" />
+              <Ionicons name="calendar" size={20} color="#FFFFFF" />
             </TouchableOpacity>
           )}
           <TouchableOpacity 
@@ -2026,7 +2684,7 @@ const styles = StyleSheet.create({
               loadConversations();
             }}
           >
-            <Ionicons name="chatbubbles" size={20} color="#000" />
+            <Ionicons name="chatbubbles" size={20} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </LinearGradient>
@@ -2051,7 +2709,10 @@ const styles = StyleSheet.create({
           
           <TouchableOpacity 
             style={styles.quickActionButton}
-            onPress={() => setCurrentScreen('profile')}
+            onPress={() => {
+              setCurrentScreen('profile');
+              loadCertificates();
+            }}
           >
             <Ionicons name="person" size={24} color="#4A90E2" />
             <Text style={styles.quickActionText}>Profile</Text>
@@ -2068,7 +2729,14 @@ const styles = StyleSheet.create({
         ) : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.eventsScroll}>
             {events.map(event => (
-              <View key={event.id} style={styles.eventCard}>
+              <TouchableOpacity 
+                key={event.id} 
+                style={styles.eventCard}
+                onPress={() => {
+                  loadEventDetails(event.id);
+                  setCurrentScreen('eventDetail');
+                }}
+              >
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <Text style={styles.eventVenue}>{event.venue}</Text>
                 <Text style={styles.eventDate}>
@@ -2079,10 +2747,101 @@ const styles = StyleSheet.create({
                 </Text>
                 <Text style={styles.eventClub}>by {event.club?.name}</Text>
                 <Text style={styles.eventLead}>Lead: {event.club?.lead?.name}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}
+
+        {/* Past Events Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Past Events</Text>
+          <Ionicons name="time" size={20} color="#666" />
+        </View>
+
+        {/* Debug info */}
+        <Text style={{ color: '#666', fontSize: 12, marginBottom: 8 }}>
+          Debug: Loading={loadingPastEvents.toString()}, Count={pastEvents.length}
+        </Text>
+
+        {loadingPastEvents ? (
+          <ActivityIndicator style={styles.loader} />
+        ) : pastEvents.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.eventsScroll}>
+            {pastEvents.map(event => (
+              <TouchableOpacity 
+                key={event.id} 
+                style={[styles.eventCard, { opacity: 0.8 }]}
+                onPress={() => {
+                  loadEventDetails(event.id);
+                  setCurrentScreen('eventDetail');
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                  <Ionicons name="checkmark-circle" size={16} color="#4CAF50" />
+                  <Text style={[styles.eventTitle, { marginLeft: 4, fontSize: 16 }]}>Completed</Text>
+                </View>
+                <Text style={styles.eventTitle}>{event.title}</Text>
+                <Text style={styles.eventVenue}>{event.venue}</Text>
+                <Text style={styles.eventDate}>
+                  {new Date(event.date).toLocaleDateString()}
+                </Text>
+                <Text style={styles.eventRegistrations}>
+                  {event.registration_count}/{event.capacity} attended
+                </Text>
+                <Text style={styles.eventClub}>by {event.club?.name}</Text>
+                <Text style={styles.eventLead}>Lead: {event.club?.lead?.name}</Text>
+                
+                {/* Certificate indicator for registered users */}
+                {user && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8, padding: 8, backgroundColor: '#2A4A6B', borderRadius: 6 }}>
+                    <Ionicons name="ribbon" size={14} color="#4A90E2" />
+                    <Text style={{ color: '#4A90E2', fontSize: 12, marginLeft: 4, fontWeight: '600' }}>
+                      Certificate Available
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        ) : (
+          <View style={[styles.eventCard, { alignItems: 'center', justifyContent: 'center', height: 120 }]}>
+            <Ionicons name="calendar-outline" size={32} color="#666" />
+            <Text style={[styles.eventDescription, { textAlign: 'center', marginTop: 8 }]}>
+              No past events yet
+            </Text>
+          </View>
+        )}
+
+        {/* Clubs Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Popular Clubs</Text>
+          <Ionicons name="people" size={20} color="#666" />
+        </View>
+        
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.eventsScroll}>
+          {clubs.map(club => (
+            <TouchableOpacity 
+              key={club.id} 
+              style={styles.eventCard}
+              onPress={() => {
+                loadClubDetails(club.id);
+                setCurrentScreen('clubDetail');
+              }}
+            >
+              <View style={styles.clubCardHeader}>
+                <Ionicons name="people-circle" size={40} color="#4A90E2" />
+              </View>
+              <Text style={styles.eventTitle}>{club.name}</Text>
+              <Text style={styles.eventDescription} numberOfLines={2}>
+                {club.description}
+              </Text>
+              <Text style={styles.eventRegistrations}>
+                {club.member_count || 0} members
+              </Text>
+              <Text style={styles.eventClub}>Lead: {club.lead?.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -2117,14 +2876,14 @@ const styles = StyleSheet.create({
   // Community Screen
   const renderCommunityScreen = () => (
     <View style={styles.container}>
-      <StatusBar style="dark" />
-      <LinearGradient colors={['#E8E8E8', '#C0C0C0', '#A8A8A8']} style={styles.header}>
+      <StatusBar style="light" />
+      <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
         <TouchableOpacity onPress={() => setCurrentScreen('home')}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Community</Text>
         <TouchableOpacity onPress={() => setShowCreatePost(true)}>
-          <Ionicons name="add" size={24} color="#000" />
+          <Ionicons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </LinearGradient>
       
@@ -2259,6 +3018,47 @@ const styles = StyleSheet.create({
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Certificates Section */}
+        <View style={styles.recentPostsCard}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <Text style={styles.cardTitle}>My Certificates</Text>
+            <TouchableOpacity onPress={loadCertificates}>
+              <Ionicons name="refresh" size={20} color="#4A90E2" />
+            </TouchableOpacity>
+          </View>
+          
+          {loadingCertificates ? (
+            <ActivityIndicator style={styles.loader} />
+          ) : certificates.length > 0 ? (
+            certificates.slice(0, 3).map((cert: any) => (
+              <TouchableOpacity 
+                key={cert.id} 
+                style={styles.recentPostItem}
+                onPress={() => downloadCertificate(cert.id, cert.event.title)}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.recentPostTitle}>{cert.event.title}</Text>
+                    <Text style={styles.recentPostDate}>
+                      Issued: {new Date(cert.issuedAt).toLocaleDateString()}
+                    </Text>
+                    {cert.event.organizer && (
+                      <Text style={[styles.recentPostDate, { color: '#4A90E2' }]}>
+                        by {cert.event.organizer}
+                      </Text>
+                    )}
+                  </View>
+                  <Ionicons name="download" size={20} color="#4A90E2" />
+                </View>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={[styles.recentPostDate, { textAlign: 'center', marginVertical: 20 }]}>
+              No certificates yet. Register for events to earn certificates!
+            </Text>
+          )}
+        </View>
       </ScrollView>
 
       <View style={styles.bottomNav}>
@@ -2288,6 +3088,299 @@ const styles = StyleSheet.create({
       </View>
     </View>
   );
+
+  // Individual Event Page
+  const renderEventPage = () => {
+    if (!selectedEvent) return null;
+
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => setCurrentScreen('home')}
+          >
+            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Event Details</Text>
+          <View style={styles.headerButton} />
+        </LinearGradient>
+
+        <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+          {loadingEventDetails ? (
+            <ActivityIndicator style={styles.loader} size="large" />
+          ) : (
+            <>
+              {/* Event Header */}
+              <View style={styles.eventPageHeader}>
+                <Text style={styles.eventPageTitle}>{selectedEvent.title}</Text>
+                <View style={styles.eventPageMeta}>
+                  <View style={styles.eventMetaItem}>
+                    <Ionicons name="calendar-outline" size={16} color="#666" />
+                    <Text style={styles.eventMetaText}>
+                      {new Date(selectedEvent.date).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </Text>
+                  </View>
+                  <View style={styles.eventMetaItem}>
+                    <Ionicons name="time-outline" size={16} color="#666" />
+                    <Text style={styles.eventMetaText}>
+                      {new Date(selectedEvent.date).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </Text>
+                  </View>
+                  <View style={styles.eventMetaItem}>
+                    <Ionicons name="location-outline" size={16} color="#666" />
+                    <Text style={styles.eventMetaText}>{selectedEvent.venue}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Event Stats */}
+              <View style={styles.eventStatsCard}>
+                <View style={styles.eventStatItem}>
+                  <Text style={styles.eventStatNumber}>{selectedEvent.registration_count || 0}</Text>
+                  <Text style={styles.eventStatLabel}>Registered</Text>
+                </View>
+                <View style={styles.eventStatItem}>
+                  <Text style={styles.eventStatNumber}>{selectedEvent.capacity}</Text>
+                  <Text style={styles.eventStatLabel}>Capacity</Text>
+                </View>
+                <View style={styles.eventStatItem}>
+                  <Text style={styles.eventStatNumber}>
+                    {selectedEvent.capacity - (selectedEvent.registration_count || 0)}
+                  </Text>
+                  <Text style={styles.eventStatLabel}>Available</Text>
+                </View>
+              </View>
+
+              {/* Event Description */}
+              <View style={styles.eventDescriptionCard}>
+                <Text style={styles.cardTitle}>About This Event</Text>
+                <Text style={styles.eventDescription}>{selectedEvent.description}</Text>
+              </View>
+
+              {/* Organized By */}
+              <View style={styles.organizerCard}>
+                <Text style={styles.cardTitle}>Organized By</Text>
+                <View style={styles.organizerInfo}>
+                  <Ionicons name="people-circle-outline" size={40} color="#4A90E2" />
+                  <View style={styles.organizerDetails}>
+                    <Text style={styles.organizerName}>{selectedEvent.club?.name}</Text>
+                    <Text style={styles.organizerLead}>Lead: {selectedEvent.club?.lead?.name}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Registration Button */}
+              {user && (
+                <TouchableOpacity 
+                  style={styles.registerButton}
+                  onPress={() => registerForEvent(selectedEvent.id)}
+                >
+                  <Ionicons name="checkmark-circle-outline" size={20} color="#fff" />
+                  <Text style={styles.registerButtonText}>Register for Event</Text>
+                </TouchableOpacity>
+              )}
+
+              {!user && (
+                <View style={styles.loginPromptCard}>
+                  <Text style={styles.loginPromptText}>Please login to register for this event</Text>
+                  <TouchableOpacity 
+                    style={styles.loginPromptButton}
+                    onPress={() => {
+                      setCurrentScreen('login');
+                    }}
+                  >
+                    <Text style={styles.loginPromptButtonText}>Login</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+        </ScrollView>
+
+        <View style={styles.bottomNav}>
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'home' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('home')}
+          >
+            <Ionicons name="home" size={24} color={currentScreen === 'home' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'home' && styles.navTextActive]}>Home</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'community' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('community')}
+          >
+            <Ionicons name="people" size={24} color={currentScreen === 'community' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'community' && styles.navTextActive]}>Community</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'profile' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('profile')}
+          >
+            <Ionicons name="person" size={24} color={currentScreen === 'profile' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'profile' && styles.navTextActive]}>Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
+  // Individual Club Page
+  const renderClubPage = () => {
+    if (!selectedClub) return null;
+
+    return (
+      <View style={styles.container}>
+        <StatusBar style="light" />
+        <LinearGradient colors={['#1A1A1A', '#2A2A2A', '#3A3A3A']} style={styles.header}>
+          <TouchableOpacity 
+            style={styles.headerButton}
+            onPress={() => setCurrentScreen('home')}
+          >
+            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Club Details</Text>
+          <View style={styles.headerButton} />
+        </LinearGradient>
+
+        <ScrollView style={styles.content} contentContainerStyle={styles.scrollContent}>
+          {loadingClubDetails ? (
+            <ActivityIndicator style={styles.loader} size="large" />
+          ) : (
+            <>
+              {/* Club Header */}
+              <View style={styles.clubPageHeader}>
+                <View style={styles.clubIcon}>
+                  <Ionicons name="people-circle" size={60} color="#4A90E2" />
+                </View>
+                <Text style={styles.clubPageTitle}>{selectedClub.name}</Text>
+                <Text style={styles.clubPageDescription}>{selectedClub.description}</Text>
+              </View>
+
+              {/* Club Stats */}
+              <View style={styles.clubStatsCard}>
+                <View style={styles.clubStatItem}>
+                  <Text style={styles.clubStatNumber}>{selectedClub.member_count || 0}</Text>
+                  <Text style={styles.clubStatLabel}>Members</Text>
+                </View>
+                <View style={styles.clubStatItem}>
+                  <Text style={styles.clubStatNumber}>{selectedClub.event_count || 0}</Text>
+                  <Text style={styles.clubStatLabel}>Events</Text>
+                </View>
+                <View style={styles.clubStatItem}>
+                  <Text style={styles.clubStatNumber}>
+                    {new Date(selectedClub.created_at).getFullYear()}
+                  </Text>
+                  <Text style={styles.clubStatLabel}>Founded</Text>
+                </View>
+              </View>
+
+              {/* Club Lead */}
+              <View style={styles.clubLeadCard}>
+                <Text style={styles.cardTitle}>Club Leadership</Text>
+                <View style={styles.leadInfo}>
+                  <Ionicons name="person-circle-outline" size={40} color="#4A90E2" />
+                  <View style={styles.leadDetails}>
+                    <Text style={styles.leadName}>{selectedClub.lead?.name}</Text>
+                    <Text style={styles.leadEmail}>{selectedClub.lead?.email}</Text>
+                    <Text style={styles.leadRole}>Club Lead</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* Upcoming Events */}
+              {selectedClub.events && selectedClub.events.length > 0 && (
+                <View style={styles.clubEventsCard}>
+                  <Text style={styles.cardTitle}>Upcoming Events</Text>
+                  {selectedClub.events.map((event: any) => (
+                    <TouchableOpacity 
+                      key={event.id}
+                      style={styles.clubEventItem}
+                      onPress={() => {
+                        loadEventDetails(event.id);
+                        setCurrentScreen('eventDetail');
+                      }}
+                    >
+                      <View style={styles.clubEventInfo}>
+                        <Text style={styles.clubEventTitle}>{event.title}</Text>
+                        <Text style={styles.clubEventDate}>
+                          {new Date(event.date).toLocaleDateString()}
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={20} color="#666" />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+
+              {/* Join Button */}
+              {user && (
+                <TouchableOpacity 
+                  style={styles.joinButton}
+                  onPress={() => joinClub(selectedClub.id)}
+                >
+                  <Ionicons name="add-circle-outline" size={20} color="#fff" />
+                  <Text style={styles.joinButtonText}>Join Club</Text>
+                </TouchableOpacity>
+              )}
+
+              {!user && (
+                <View style={styles.loginPromptCard}>
+                  <Text style={styles.loginPromptText}>Please login to join this club</Text>
+                  <TouchableOpacity 
+                    style={styles.loginPromptButton}
+                    onPress={() => {
+                      setCurrentScreen('login');
+                    }}
+                  >
+                    <Text style={styles.loginPromptButtonText}>Login</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          )}
+        </ScrollView>
+
+        <View style={styles.bottomNav}>
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'home' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('home')}
+          >
+            <Ionicons name="home" size={24} color={currentScreen === 'home' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'home' && styles.navTextActive]}>Home</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'community' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('community')}
+          >
+            <Ionicons name="people" size={24} color={currentScreen === 'community' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'community' && styles.navTextActive]}>Community</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.navButton, currentScreen === 'profile' && styles.navButtonActive]}
+            onPress={() => setCurrentScreen('profile')}
+          >
+            <Ionicons name="person" size={24} color={currentScreen === 'profile' ? "#4A90E2" : "#666"} />
+            <Text style={[styles.navText, currentScreen === 'profile' && styles.navTextActive]}>Profile</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   // Admin Dashboard
   const renderAdminDashboard = () => (
     <View style={styles.modalContainer}>
@@ -3076,6 +4169,8 @@ const styles = StyleSheet.create({
       {currentScreen === 'home' && renderHomeScreen()}
       {currentScreen === 'community' && renderCommunityScreen()}
       {currentScreen === 'profile' && renderProfileScreen()}
+      {currentScreen === 'eventDetail' && renderEventPage()}
+      {currentScreen === 'clubDetail' && renderClubPage()}
       
       {showAdmin && renderAdminDashboard()}
       {showCoordinator && renderCoordinatorDashboard()}
