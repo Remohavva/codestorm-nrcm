@@ -1219,11 +1219,14 @@ const styles = StyleSheet.create({
         await AsyncStorage.setItem('authToken', token);
         await AsyncStorage.setItem('user', JSON.stringify(user));
         
+        console.log('Login successful! User data:', user);
+        console.log('User role:', user.role);
+        
         setUser(user);
         setCurrentScreen('home');
         loadPosts();
         loadEvents();
-        Alert.alert('Success!', 'You are now logged in!');
+        Alert.alert('Success!', `You are now logged in! Role: ${user.role}`);
       } else {
         throw new Error(response.message || 'Login failed');
       }
@@ -1978,7 +1981,14 @@ const styles = StyleSheet.create({
   );
 
   // Home Screen
-  const renderHomeScreen = () => (
+  const renderHomeScreen = () => {
+    console.log('Rendering home screen. User:', user);
+    console.log('User role:', user?.role);
+    console.log('Is club_lead?', user?.role === 'club_lead');
+    console.log('Is admin?', user?.role === 'admin');
+    console.log('Should show coordinator?', (user?.role === 'club_lead' || user?.role === 'admin'));
+    
+    return (
     <View style={styles.container}>
       <StatusBar style="dark" />
       <LinearGradient colors={['#E8E8E8', '#C0C0C0', '#A8A8A8']} style={styles.header}>
@@ -1999,6 +2009,9 @@ const styles = StyleSheet.create({
             <TouchableOpacity 
               style={styles.headerButton}
               onPress={() => {
+                console.log('Calendar icon pressed! User role:', user?.role);
+                console.log('User data:', user);
+                Alert.alert('Debug', `Calendar pressed! User role: ${user?.role}`);
                 setShowCoordinator(true);
                 loadCoordinatorDashboard();
               }}
@@ -2098,7 +2111,8 @@ const styles = StyleSheet.create({
         </TouchableOpacity>
       </View>
     </View>
-  );
+    );
+  };
 
   // Community Screen
   const renderCommunityScreen = () => (
