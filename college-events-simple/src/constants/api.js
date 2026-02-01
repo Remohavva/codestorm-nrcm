@@ -37,6 +37,15 @@ export const API_ENDPOINTS = {
   ADMIN_HANDLE_REPORT: (id) => `/admin/reports/${id}`,
   ADMIN_COMMUNITY_ANALYTICS: '/admin/community/analytics',
   
+  // Coordinator
+  COORDINATOR_DASHBOARD: '/coordinator/dashboard',
+  COORDINATOR_CLUBS: '/coordinator/clubs',
+  COORDINATOR_EVENTS: '/coordinator/events',
+  COORDINATOR_CREATE_EVENT: '/coordinator/events',
+  COORDINATOR_UPDATE_EVENT: (id) => `/coordinator/events/${id}`,
+  COORDINATOR_DELETE_EVENT: (id) => `/coordinator/events/${id}`,
+  COORDINATOR_EVENT_REGISTRATIONS: (id) => `/coordinator/events/${id}/registrations`,
+  
   // Upload
   UPLOAD_IMAGE: '/upload/image',
 };

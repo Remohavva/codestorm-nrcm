@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { supabaseAdmin } = require('./src/utils/supabase');
 
 async function createTestCoordinator() {
@@ -26,50 +27,79 @@ async function createTestCoordinator() {
 
     // 2. Create a test club
     console.log('\n2. Creating test club...');
-    const { data: club, error: clubError } = await supabaseAdmin
+    
+    // First check if club already exists
+    const { data: existingClub, error: checkError } = await supabaseAdmin
       .from('clubs')
-      .upsert([
-        {
-          name: 'Tech Innovation Club',
-          description: 'A club for technology enthusiasts and innovators',
-          lead_id: user.id
-        }
-      ], { onConflict: 'name' })
-      .select()
+      .select('*')
+      .eq('name', 'Tech Innovation Club')
       .single();
 
-    if (clubError) {
-      console.error('Club creation error:', clubError);
-      return;
+    let club;
+    if (existingClub) {
+      console.log('✅ Club already exists:', existingClub.name);
+      club = existingClub;
+    } else {
+      const { data: newClub, error: clubError } = await supabaseAdmin
+        .from('clubs')
+        .insert([
+          {
+            name: 'Tech Innovation Club',
+            description: 'A club for technology enthusiasts and innovators',
+            lead_id: user.id
+          }
+        ])
+        .select()
+        .single();
+
+      if (clubError) {
+        console.error('Club creation error:', clubError);
+        return;
+      }
+      console.log('✅ Club created:', newClub.name);
+      club = newClub;
     }
-    console.log('✅ Club created:', club.name);
 
     // 3. Create a sample event
     console.log('\n3. Creating sample event...');
     const eventDate = new Date();
     eventDate.setDate(eventDate.getDate() + 7); // 7 days from now
 
-    const { data: event, error: eventError } = await supabaseAdmin
+    // Check if event already exists
+    const { data: existingEvent, error: checkEventError } = await supabaseAdmin
       .from('events')
-      .upsert([
-        {
-          title: 'Tech Talk: AI in Modern Development',
-          description: 'Join us for an exciting discussion about AI tools and their impact on software development.',
-          date: eventDate.toISOString(),
-          venue: 'Main Auditorium',
-          capacity: 100,
-          club_id: club.id,
-          status: 'pending'
-        }
-      ], { onConflict: 'title' })
-      .select()
+      .select('*')
+      .eq('title', 'Tech Talk: AI in Modern Development')
       .single();
 
-    if (eventError) {
-      console.error('Event creation error:', eventError);
-      return;
+    let event;
+    if (existingEvent) {
+      console.log('✅ Event already exists:', existingEvent.title);
+      event = existingEvent;
+    } else {
+      const { data: newEvent, error: eventError } = await supabaseAdmin
+        .from('events')
+        .insert([
+          {
+            title: 'Tech Talk: AI in Modern Development',
+            description: 'Join us for an exciting discussion about AI tools and their impact on software development.',
+            date: eventDate.toISOString(),
+            venue: 'Main Auditorium',
+            capacity: 100,
+            club_id: club.id,
+            status: 'pending'
+          }
+        ])
+        .select()
+        .single();
+
+      if (eventError) {
+        console.error('Event creation error:', eventError);
+        return;
+      }
+      console.log('✅ Sample event created:', newEvent.title);
+      event = newEvent;
     }
-    console.log('✅ Sample event created:', event.title);
 
     console.log('\n🎉 Test coordinator setup completed successfully!');
     console.log('\n📝 Login Credentials:');
