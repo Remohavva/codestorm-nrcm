@@ -3,18 +3,45 @@ const { supabaseAdmin } = require('../utils/supabase');
 // Create new post
 const createPost = async (req, res, next) => {
   try {
-    const { title, content, category } = req.body;
+    const { title, content, category, image_url, image_caption, post_type = 'text' } = req.body;
     const userId = req.user.id;
+
+    // Validate post type
+    const validPostTypes = ['text', 'image', 'mixed'];
+    if (!validPostTypes.includes(post_type)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid post type. Must be text, image, or mixed.'
+      });
+    }
+
+    // Validate required fields based on post type
+    if (post_type === 'image' && !image_url) {
+      return res.status(400).json({
+        success: false,
+        message: 'Image URL is required for image posts.'
+      });
+    }
+
+    if (post_type === 'text' && (!title || !content)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title and content are required for text posts.'
+      });
+    }
 
     // Create post
     const { data: postData, error: postError } = await supabaseAdmin
       .from('posts')
       .insert([{
-        title,
-        content,
+        title: title || '',
+        content: content || '',
         category,
         author_id: userId,
-        status: 'active'
+        status: 'active',
+        image_url,
+        image_caption,
+        post_type
       }])
       .select(`
         *,

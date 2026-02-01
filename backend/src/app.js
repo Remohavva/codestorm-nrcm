@@ -14,6 +14,8 @@ const attendanceRoutes = require('./routes/attendance');
 const adminRoutes = require('./routes/admin');
 const coordinatorRoutes = require('./routes/coordinator');
 const communityRoutes = require('./routes/community');
+const chatRoutes = require('./routes/chat');
+const uploadRoutes = require('./routes/upload');
 
 const app = express();
 
@@ -31,6 +33,9 @@ app.use(cors({
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (uploaded images)
+app.use('/uploads', express.static('uploads'));
 
 // Request logging middleware (development only)
 if (process.env.NODE_ENV === 'development') {
@@ -59,6 +64,8 @@ app.use('/api', attendanceRoutes);   // Includes /api/events/:id/checkin and /ap
 app.use('/api/admin', adminRoutes);
 app.use('/api/coordinator', coordinatorRoutes);
 app.use('/api/community', communityRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // 404 handler
 app.use(notFound);
